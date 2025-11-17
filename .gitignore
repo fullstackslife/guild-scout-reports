@@ -1,0 +1,11 @@
+.env
+.env.local
+.env.*.local
+node_modules
+.next
+out
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+dist
+supabase/.branches
