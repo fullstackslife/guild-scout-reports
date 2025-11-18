@@ -128,16 +128,23 @@ export async function parseScoutReportFromText(
                        textContent.text.match(/\{[\s\S]*\}/);
       
       if (jsonMatch) {
-        parsedData = JSON.parse(jsonMatch[1] || jsonMatch[0]);
+        const jsonString = jsonMatch[1] || jsonMatch[0];
+        parsedData = JSON.parse(jsonString) as ParsedScoutReport;
       } else {
-        parsedData = JSON.parse(textContent.text);
+        // Try to find JSON object in the text
+        const jsonObjectMatch = textContent.text.match(/\{[\s\S]*\}/);
+        if (jsonObjectMatch) {
+          parsedData = JSON.parse(jsonObjectMatch[0]) as ParsedScoutReport;
+        } else {
+          throw new Error("No JSON object found in response");
+        }
       }
     } catch (parseError) {
       console.error("Failed to parse JSON response:", parseError);
-      console.error("Response text:", textContent.text);
+      console.error("Response text:", textContent.text.substring(0, 500));
       return {
         success: false,
-        error: "Failed to parse structured data from API response"
+        error: `Failed to parse structured data: ${parseError instanceof Error ? parseError.message : "Unknown error"}`
       };
     }
 
