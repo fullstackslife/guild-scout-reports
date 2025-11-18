@@ -104,7 +104,7 @@ export function GamesClient({ games }: GamesClientProps) {
               🕵️ Optional: Guild Help Activity (Spy Accounts Only)
             </h4>
             <p style={{ margin: 0, color: '#94a3b8' }}>
-              <strong>Note:</strong> You cannot see an enemy guild's help feed directly. However, if your guild has a spy account inside the enemy guild, monitoring help activity can be a useful indicator. The number of helps sent to guild mates can reveal if someone is actually online even if they appear offline. This is an advanced tactic that requires internal access to the target guild.
+              <strong>Note:</strong> You cannot see an enemy guild&apos;s help feed directly. However, if your guild has a spy account inside the enemy guild, monitoring help activity can be a useful indicator. The number of helps sent to guild mates can reveal if someone is actually online even if they appear offline. This is an advanced tactic that requires internal access to the target guild.
             </p>
           </div>
         </div>
@@ -282,7 +282,7 @@ function ScoutReportAnalysisGuide() {
         </h3>
       </div>
       <p style={{ margin: '0 0 1rem 0', color: '#cbd5f5', fontSize: '0.95rem', lineHeight: 1.6 }}>
-        <strong>Good players don't "read" a scout report—they interrogate it.</strong> Every report exists to answer four core questions:
+        <strong>Good players don&apos;t &quot;read&quot; a scout report—they interrogate it.</strong> Every report exists to answer four core questions:
       </p>
 
       <div style={{ display: 'grid', gap: '1rem', marginBottom: '1.5rem' }}>
@@ -294,7 +294,7 @@ function ScoutReportAnalysisGuide() {
             border: '1px solid rgba(251, 191, 36, 0.2)'
           }}
         >
-          <div style={{ fontWeight: 600, color: '#fbbf24', marginBottom: '0.25rem' }}>1. What's the frontline + troop comp?</div>
+          <div style={{ fontWeight: 600, color: '#fbbf24', marginBottom: '0.25rem' }}>1. What&apos;s the frontline + troop comp?</div>
           <div style={{ color: '#cbd5f5', fontSize: '0.9rem' }}>What do I send, and can I even burn them?</div>
         </div>
         <div
@@ -342,7 +342,7 @@ function ScoutReportAnalysisGuide() {
               <strong>Castle might vs troop count:</strong> Huge might + low visible troops = research/buildings heavy OR troops hidden (shelter, fake rally, Wonder). Medium might + huge troop count (especially T2 carpet) = probable rally trap.
             </p>
             <p style={{ margin: 0 }}>
-              <strong>Leader present?</strong> Leader inside = they're comfortable (or AFK) and will eat you if you misplay. No leader visible = might be hiding in shelter/prison, or already zeroed.
+              <strong>Leader present?</strong> Leader inside = they&apos;re comfortable (or AFK) and will eat you if you misplay. No leader visible = might be hiding in shelter/prison, or already zeroed.
             </p>
           </div>
         </div>
@@ -353,7 +353,7 @@ function ScoutReportAnalysisGuide() {
           </h4>
           <div style={{ color: '#cbd5f5', fontSize: '0.9rem', lineHeight: 1.6 }}>
             <p style={{ margin: '0 0 0.5rem 0' }}>
-              <strong>Total troop count:</strong> Under ~3–5M troops and no reinforcements? Usually solo food. 10M+ troops with decent might? Now we're talking rallies or skip.
+              <strong>Total troop count:</strong> Under ~3–5M troops and no reinforcements? Usually solo food. 10M+ troops with decent might? Now we&apos;re talking rallies or skip.
             </p>
             <p style={{ margin: '0 0 0.5rem 0' }}>
               <strong>Troop tiers:</strong> A mountain of T2 with some T4/T5 = classic trap-style comp. Mostly T3/T4 with weak T2 = often a normal fighter, more killable.
@@ -386,17 +386,17 @@ function ScoutReportAnalysisGuide() {
 
         <div>
           <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', color: '#e2e8f0', fontWeight: 600 }}>
-            Step 4: Boons, Wounded, and "Is This a Trap?"
+            Step 4: Boons, Wounded, and &quot;Is This a Trap?&quot;
           </h4>
           <div style={{ color: '#cbd5f5', fontSize: '0.9rem', lineHeight: 1.6 }}>
             <p style={{ margin: '0 0 0.5rem 0' }}>
-              <strong>Boons/Turf boosts:</strong> Active Army ATK/DEF/HP, Army Size, etc. means they've prepared or are currently in war mode. No boons doesn't guarantee offline, but it's a softer signal.
+              <strong>Boons/Turf boosts:</strong> Active Army ATK/DEF/HP, Army Size, etc. means they&apos;ve prepared or are currently in war mode. No boons doesn&apos;t guarantee offline, but it&apos;s a softer signal.
             </p>
             <p style={{ margin: '0 0 0.5rem 0' }}>
               <strong>Wounded in infirmary:</strong> Lots of wounded = they recently got hit or just ate something. Are they repairing and still online? Or AFK farming and forgot to heal?
             </p>
             <p style={{ margin: 0 }}>
-              <strong>Reinforcements/names:</strong> If reinforcements are from strong rally leads, they're probably trying to bait you into bad trades. This entire step is "is this guy actually asleep, or am I about to walk into a content creator thumbnail?"
+              <strong>Reinforcements/names:</strong> If reinforcements are from strong rally leads, they&apos;re probably trying to bait you into bad trades. This entire step is &quot;is this guy actually asleep, or am I about to walk into a content creator thumbnail?&quot;
             </p>
           </div>
         </div>
@@ -407,10 +407,10 @@ function ScoutReportAnalysisGuide() {
           </h4>
           <div style={{ color: '#cbd5f5', fontSize: '0.9rem', lineHeight: 1.6 }}>
             <p style={{ margin: '0 0 0.5rem 0' }}>
-              Check how much is above vault limit, keeping in mind: Food is often shown as "–" if upkeep is high. There's a 30% tax when you loot from another castle.
+              Check how much is above vault limit, keeping in mind: Food is often shown as &quot;–&quot; if upkeep is high. There&apos;s a 30% tax when you loot from another castle.
             </p>
             <p style={{ margin: 0 }}>
-              Strong players will ignore decent troops if the resources are garbage and they don't care about kills at that moment (or vice-versa). If your goal is pure troop kills, resources are just a side bonus.
+              Strong players will ignore decent troops if the resources are garbage and they don&apos;t care about kills at that moment (or vice-versa). If your goal is pure troop kills, resources are just a side bonus.
             </p>
           </div>
         </div>

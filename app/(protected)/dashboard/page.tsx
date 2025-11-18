@@ -33,7 +33,7 @@ export default async function DashboardPage({
     .select('guild_id, guilds(*)')
     .eq('user_id', session.user.id);
 
-  const userGuildIds = (guildMemberships ?? []).map((gm: any) => gm.guild_id);
+  const userGuildIds = (guildMemberships ?? []).map((gm: { guild_id: string }) => gm.guild_id);
 
   // Fetch all user guilds
   let userGuilds: GuildRow[] = [];

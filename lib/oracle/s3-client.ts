@@ -132,8 +132,9 @@ export async function objectExistsInS3(objectName: string): Promise<boolean> {
   try {
     await client.send(command);
     return true;
-  } catch (error: any) {
-    if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
+  } catch (error: unknown) {
+    const err = error as { name?: string; $metadata?: { httpStatusCode?: number } };
+    if (err.name === 'NotFound' || err.$metadata?.httpStatusCode === 404) {
       return false;
     }
     throw error;

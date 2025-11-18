@@ -37,7 +37,7 @@ export default async function GalleryPage({
     .select('guild_id, guilds(*)')
     .eq('user_id', session.user.id);
 
-  const userGuildIds = (guildMemberships ?? []).map((gm: any) => gm.guild_id);
+  const userGuildIds = (guildMemberships ?? []).map((gm: { guild_id: string }) => gm.guild_id);
 
   // Fetch all user guilds with screenshot counts
   let userGuilds: Array<GuildRow & { screenshotCount: number }> = [];
@@ -51,7 +51,7 @@ export default async function GalleryPage({
     if (guildsData) {
       // Get screenshot counts for each guild
       const screenshotCounts = await Promise.all(
-        guildsData.map(async (guild) => {
+        (guildsData as GuildRow[]).map(async (guild) => {
           const { count } = await supabase
             .from('screenshots')
             .select('*', { count: 'exact', head: true })
@@ -60,7 +60,7 @@ export default async function GalleryPage({
         })
       );
 
-      userGuilds = guildsData.map((guild) => {
+      userGuilds = (guildsData as GuildRow[]).map((guild) => {
         const countData = screenshotCounts.find((c) => c.guildId === guild.id);
         return {
           ...guild,

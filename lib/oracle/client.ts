@@ -3,12 +3,29 @@
  * 
  * Provides connection pooling and query utilities for Oracle Autonomous Database.
  * Compatible with PostgreSQL-style queries with minor adjustments.
+ * 
+ * Note: This module requires Oracle Instant Client and should only be used server-side.
  */
 
-import oracledb from 'oracledb';
+// Dynamic import for oracledb to avoid bundling issues
+let oracledb: typeof import('oracledb') | null = null;
+
+async function getOracleDb() {
+  if (!oracledb) {
+    // Only import on server-side
+    if (typeof window === 'undefined') {
+      oracledb = await import('oracledb');
+    } else {
+      throw new Error('Oracle client can only be used server-side');
+    }
+  }
+  return oracledb;
+}
+
+import * as fs from 'fs';
 
 // Connection pool instance
-let pool: oracledb.Pool | null = null;
+let pool: import('oracledb').Pool | null = null;
 let clientInitialized = false;
 
 export interface OracleConfig {
@@ -23,11 +40,12 @@ export interface OracleConfig {
 /**
  * Initialize Oracle connection pool
  */
-export async function initOraclePool(config?: Partial<OracleConfig>): Promise<oracledb.Pool> {
+export async function initOraclePool(config?: Partial<OracleConfig>): Promise<import('oracledb').Pool> {
   if (pool) {
     return pool;
   }
 
+  const db = await getOracleDb();
   const defaultConfig: OracleConfig = {
     user: process.env.ORACLE_DB_USER || '',
     password: process.env.ORACLE_DB_PASSWORD || '',
@@ -52,13 +70,12 @@ export async function initOraclePool(config?: Partial<OracleConfig>): Promise<or
       console.log(`🔐 Initializing Oracle client with wallet: ${tnsAdminPath}`);
       
       // Check if path exists
-      const fs = require('fs');
       if (!fs.existsSync(tnsAdminPath)) {
         throw new Error(`Wallet directory not found: ${tnsAdminPath}. Please check TNS_ADMIN path.`);
       }
       
       // Initialize Oracle client with wallet
-      const initOptions: any = { configDir: tnsAdminPath };
+      const initOptions: { configDir: string; libDir?: string } = { configDir: tnsAdminPath };
       
       // Set Instant Client library directory
       // Check environment variable first, then try common locations
@@ -71,9 +88,8 @@ export async function initOraclePool(config?: Partial<OracleConfig>): Promise<or
           'C:\\oracle\\instantclient_21_13',
           'C:\\oracle\\instantclient_19_19',
           process.env.ORACLE_HOME ? `${process.env.ORACLE_HOME}\\instantclient_23_8` : null,
-        ].filter(Boolean);
+        ].filter(Boolean) as string[];
         
-        const fs = require('fs');
         for (const path of commonPaths) {
           if (fs.existsSync(path)) {
             libDir = path;
@@ -90,12 +106,12 @@ export async function initOraclePool(config?: Partial<OracleConfig>): Promise<or
         console.warn('⚠️  Oracle Instant Client not found. Make sure it\'s in PATH or set ORACLE_CLIENT_LIB_DIR');
       }
       
-      oracledb.initOracleClient(initOptions);
+      db.initOracleClient(initOptions);
       clientInitialized = true;
       console.log('✅ Oracle client initialized with wallet');
     }
 
-    pool = await oracledb.createPool({
+    pool = await db.createPool({
       user: finalConfig.user,
       password: finalConfig.password,
       connectionString: finalConfig.connectionString,
@@ -118,7 +134,7 @@ export async function initOraclePool(config?: Partial<OracleConfig>): Promise<or
 /**
  * Get existing pool or create new one
  */
-export async function getOraclePool(): Promise<oracledb.Pool> {
+export async function getOraclePool(): Promise<import('oracledb').Pool> {
   if (!pool) {
     return await initOraclePool();
   }
@@ -128,16 +144,17 @@ export async function getOraclePool(): Promise<oracledb.Pool> {
 /**
  * Execute a query and return results
  */
-export async function executeQuery<T = any>(
+export async function executeQuery<T = Record<string, unknown>>(
   sql: string,
-  binds: any = {},
-  options: oracledb.ExecuteOptions = {}
+  binds: Record<string, unknown> = {},
+  options: import('oracledb').ExecuteOptions = {}
 ): Promise<T[]> {
+  const db = await getOracleDb();
   const connection = await (await getOraclePool()).getConnection();
   
   try {
     const result = await connection.execute<T>(sql, binds, {
-      outFormat: oracledb.OUT_FORMAT_OBJECT,
+      outFormat: db.OUT_FORMAT_OBJECT,
       ...options,
     });
 
@@ -150,10 +167,10 @@ export async function executeQuery<T = any>(
 /**
  * Execute a query and return single row
  */
-export async function executeQueryOne<T = any>(
+export async function executeQueryOne<T = Record<string, unknown>>(
   sql: string,
-  binds: any = {},
-  options: oracledb.ExecuteOptions = {}
+  binds: Record<string, unknown> = {},
+  options: import('oracledb').ExecuteOptions = {}
 ): Promise<T | null> {
   const results = await executeQuery<T>(sql, binds, options);
   return results[0] || null;
@@ -164,8 +181,8 @@ export async function executeQueryOne<T = any>(
  */
 export async function executeUpdate(
   sql: string,
-  binds: any = {},
-  options: oracledb.ExecuteOptions = {}
+  binds: Record<string, unknown> = {},
+  options: import('oracledb').ExecuteOptions = {}
 ): Promise<number> {
   const connection = await (await getOraclePool()).getConnection();
   
@@ -185,7 +202,7 @@ export async function executeUpdate(
  * Execute a transaction (multiple statements)
  */
 export async function executeTransaction<T>(
-  callback: (connection: oracledb.Connection) => Promise<T>
+  callback: (connection: import('oracledb').Connection) => Promise<T>
 ): Promise<T> {
   const connection = await (await getOraclePool()).getConnection();
   
@@ -194,7 +211,7 @@ export async function executeTransaction<T>(
     const result = await callback(connection);
     await connection.commit();
     return result;
-  } catch (error) {
+  } catch (error: unknown) {
     await connection.rollback();
     throw error;
   } finally {

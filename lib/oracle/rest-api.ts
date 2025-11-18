@@ -9,12 +9,7 @@
  * Generate OCI request signature for authentication
  * This implements OCI's request signing algorithm
  */
-async function signRequest(
-  method: string,
-  path: string,
-  headers: Record<string, string>,
-  body?: string
-): Promise<Record<string, string>> {
+async function signRequest(): Promise<Record<string, string>> {
   // For simplicity, we'll use a pre-signed approach or API key
   // In production, implement full OCI request signing
   // See: https://docs.oracle.com/en-us/iaas/Content/API/Concepts/signingrequests.htm
@@ -23,7 +18,6 @@ async function signRequest(
   const userId = process.env.OCI_USER_ID;
   const fingerprint = process.env.OCI_FINGERPRINT;
   const privateKey = process.env.OCI_PRIVATE_KEY;
-  const region = process.env.OCI_REGION || 'us-ashburn-1';
 
   if (!tenancyId || !userId || !fingerprint || !privateKey) {
     throw new Error('OCI credentials not configured. Set OCI_TENANCY_ID, OCI_USER_ID, OCI_FINGERPRINT, and OCI_PRIVATE_KEY');
@@ -42,7 +36,7 @@ async function signRequest(
 async function ociRequest(
   method: string,
   endpoint: string,
-  body?: any,
+  body?: unknown,
   additionalHeaders: Record<string, string> = {}
 ): Promise<Response> {
   const region = process.env.OCI_REGION || 'us-ashburn-1';
@@ -55,7 +49,7 @@ async function ociRequest(
   };
 
   // Add signature headers
-  const signedHeaders = await signRequest(method, endpoint, headers, body ? JSON.stringify(body) : undefined);
+  const signedHeaders = await signRequest();
   Object.assign(headers, signedHeaders);
 
   const options: RequestInit = {
@@ -105,7 +99,7 @@ export class OracleObjectStorageAPI {
           'Content-Length': content.length.toString(),
           // Add OCI auth headers here (requires proper signing)
         },
-        body: content,
+        body: content as unknown as BodyInit,
       }
     );
 
@@ -236,7 +230,7 @@ export class OracleS3API {
         // Add AWS signature headers here
         // Or use @aws-sdk/client-s3 which handles this automatically
       },
-      body: content,
+      body: content as unknown as BodyInit,
     });
 
     if (!response.ok) {
@@ -248,7 +242,7 @@ export class OracleS3API {
   /**
    * Get signed URL for object access
    */
-  async getSignedUrl(objectName: string, expiresIn: number = 3600): Promise<string> {
+  async getSignedUrl(objectName: string): Promise<string> {
     // Use @aws-sdk/s3-request-presigner for this
     // Much simpler than implementing signature manually
     const url = `${this.endpoint}/${this.bucketName}/${encodeURIComponent(objectName)}`;
@@ -282,7 +276,7 @@ export class OracleDatabaseAPI {
    * Execute SQL query via REST API
    * Requires ORDS (Oracle REST Data Services) to be enabled
    */
-  async executeQuery(sql: string, params: Record<string, any> = {}): Promise<any[]> {
+  async executeQuery(sql: string, params: Record<string, unknown> = {}): Promise<Record<string, unknown>[]> {
     if (!this.baseUrl) {
       throw new Error('ORACLE_DB_REST_URL not configured. Use direct PostgreSQL connection instead.');
     }

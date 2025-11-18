@@ -14,12 +14,12 @@ import * as objectstorage from 'oci-objectstorage';
 import * as common from 'oci-common';
 
 let objectStorageClient: objectstorage.ObjectStorageClient | null = null;
-let authenticationProvider: common.ConfigFileAuthenticationDetailsProvider | null = null;
+let authenticationProvider: common.AuthenticationDetailsProvider | null = null;
 
 /**
  * Initialize OCI authentication provider
  */
-function getAuthenticationProvider(): common.ConfigFileAuthenticationDetailsProvider {
+function getAuthenticationProvider(): common.AuthenticationDetailsProvider {
   if (authenticationProvider) {
     return authenticationProvider;
   }
@@ -32,7 +32,7 @@ function getAuthenticationProvider(): common.ConfigFileAuthenticationDetailsProv
       configFile,
       profile
     );
-  } catch (error) {
+  } catch {
     // Fallback: try environment variables or instance principal
     console.warn('Failed to load OCI config file, trying environment variables');
     
@@ -189,8 +189,8 @@ export async function getObjectStorageUrl(
     
     // Construct the full URL
     // The accessUri from the response is relative, so we need to prepend the base URL
-    const region = client.getRegion();
-    const baseUrl = `https://objectstorage.${region.regionId}.oraclecloud.com`;
+    const regionId = process.env.OCI_REGION || 'us-ashburn-1';
+    const baseUrl = `https://objectstorage.${regionId}.oraclecloud.com`;
     const fullUrl = `${baseUrl}${parResponse.preauthenticatedRequest.accessUri}`;
     
     return fullUrl;
@@ -210,7 +210,7 @@ export async function objectExists(objectName: string): Promise<boolean> {
   const client = getObjectStorageClient();
   const { namespace, bucketName } = getStorageConfig();
 
-  const headObjectRequest: oci.objectstorage.requests.HeadObjectRequest = {
+  const headObjectRequest: objectstorage.requests.HeadObjectRequest = {
     namespaceName: namespace,
     bucketName: bucketName,
     objectName: objectName,
@@ -219,8 +219,9 @@ export async function objectExists(objectName: string): Promise<boolean> {
   try {
     await client.headObject(headObjectRequest);
     return true;
-  } catch (error) {
-    if (error instanceof common.HttpRequestException && error.statusCode === 404) {
+  } catch (error: unknown) {
+    const err = error as { statusCode?: number };
+    if (err.statusCode === 404) {
       return false;
     }
     throw error;

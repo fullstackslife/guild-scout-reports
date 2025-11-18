@@ -7,7 +7,6 @@ import type { Database } from '@/lib/supabase/database.types';
 
 type ScreenshotRow = Database['public']['Tables']['screenshots']['Row'];
 type GuildRow = Database['public']['Tables']['guilds']['Row'];
-type ProfileRow = Database['public']['Tables']['profiles']['Row'];
 
 type ScreenshotWithMeta = ScreenshotRow & {
   signedUrl: string | null;
@@ -114,7 +113,7 @@ function GuildSelectionView({
             textAlign: 'center'
           }}
         >
-          <p style={{ color: '#94a3b8' }}>You're not a member of any guilds yet.</p>
+          <p style={{ color: '#94a3b8' }}>You&apos;re not a member of any guilds yet.</p>
         </div>
       ) : (
         <div
