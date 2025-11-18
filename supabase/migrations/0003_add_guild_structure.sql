@@ -104,6 +104,13 @@ for delete
 to authenticated
 using (auth.uid() = user_id);
 
+drop policy if exists "Users can update their own screenshots" on public.screenshots;
+create policy "Users can update their own screenshots"
+on public.screenshots
+for update
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
 -- Create a default guild for existing users (migration compatibility)
 insert into public.guilds (name, game, description)
 values ('Default Guild', 'General', 'Default guild for all users')
