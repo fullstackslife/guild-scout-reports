@@ -52,6 +52,13 @@ for update
 using (auth.uid() = id)
 with check (auth.uid() = id);
 
+drop policy if exists "Authenticated users can read all profiles" on public.profiles;
+create policy "Authenticated users can read all profiles"
+on public.profiles
+for select
+to authenticated
+using (true);
+
 drop policy if exists "Authenticated users can read screenshots" on public.screenshots;
 create policy "Authenticated users can read screenshots"
 on public.screenshots
