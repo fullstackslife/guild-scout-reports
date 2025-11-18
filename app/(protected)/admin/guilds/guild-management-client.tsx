@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useActionState } from 'react';
+import React, { useTransition } from 'react';
+import { useFormState } from 'react-dom';
 import {
   createGuild,
   updateGuild,
@@ -63,7 +64,14 @@ const deleteButtonStyle: React.CSSProperties = {
 };
 
 export function GuildManagementClient({ guilds, games }: GuildManagementClientProps) {
-  const [createState, createAction, createPending] = useActionState(createGuild, {});
+  const [createState, createAction] = useFormState(createGuild, {});
+  const [isCreatePending, startCreateTransition] = useTransition();
+
+  const handleCreateSubmit = (formData: FormData) => {
+    startCreateTransition(() => {
+      createAction(formData);
+    });
+  };
 
   return (
     <div style={{ display: 'grid', gap: '2rem' }}>
@@ -84,7 +92,7 @@ export function GuildManagementClient({ guilds, games }: GuildManagementClientPr
         }}
       >
         <h2 style={{ margin: '0 0 1rem 0', fontSize: '1.5rem' }}>Create New Guild</h2>
-        <form action={createAction} style={{ display: 'grid', gap: '1rem' }}>
+        <form action={handleCreateSubmit} style={{ display: 'grid', gap: '1rem' }}>
           <div>
             <label
               htmlFor="name"
@@ -132,8 +140,8 @@ export function GuildManagementClient({ guilds, games }: GuildManagementClientPr
               style={inputStyle}
             />
           </div>
-          <button type="submit" disabled={createPending} style={buttonStyle}>
-            {createPending ? 'Creating...' : 'Create Guild'}
+          <button type="submit" disabled={isCreatePending} style={buttonStyle}>
+            {isCreatePending ? 'Creating...' : 'Create Guild'}
           </button>
           {createState.error && (
             <div style={{ color: '#f87171', fontSize: '0.9rem' }}>{createState.error}</div>
@@ -195,9 +203,23 @@ function GuildItem({
   onUpdate: typeof updateGuild;
   onDelete: typeof deleteGuild;
 }) {
-  const [updateState, updateAction, updatePending] = useActionState(onUpdate, {});
-  const [deleteState, deleteAction, deletePending] = useActionState(onDelete, {});
+  const [updateState, updateAction] = useFormState(onUpdate, {});
+  const [deleteState, deleteAction] = useFormState(onDelete, {});
+  const [isUpdatePending, startUpdateTransition] = useTransition();
+  const [isDeletePending, startDeleteTransition] = useTransition();
   const [isEditing, setIsEditing] = React.useState(false);
+
+  const handleUpdateSubmit = (formData: FormData) => {
+    startUpdateTransition(() => {
+      updateAction(formData);
+    });
+  };
+
+  const handleDeleteSubmit = (formData: FormData) => {
+    startDeleteTransition(() => {
+      deleteAction(formData);
+    });
+  };
 
   if (isEditing) {
     return (
@@ -209,7 +231,7 @@ function GuildItem({
           background: '#0f172a'
         }}
       >
-        <form action={updateAction} style={{ display: 'grid', gap: '1rem' }}>
+        <form action={handleUpdateSubmit} style={{ display: 'grid', gap: '1rem' }}>
           <input type="hidden" name="guild_id" value={guild.id} />
           <div>
             <label
@@ -265,8 +287,8 @@ function GuildItem({
             />
           </div>
           <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button type="submit" disabled={updatePending} style={buttonStyle}>
-              {updatePending ? 'Saving...' : 'Save'}
+            <button type="submit" disabled={isUpdatePending} style={buttonStyle}>
+              {isUpdatePending ? 'Saving...' : 'Save'}
             </button>
             <button
               type="button"
@@ -344,14 +366,14 @@ function GuildItem({
           <button onClick={() => setIsEditing(true)} style={{ ...buttonStyle, background: '#475569', padding: '0.4rem 0.8rem', fontSize: '0.875rem' }}>
             Edit
           </button>
-          <form action={deleteAction} style={{ display: 'inline' }}>
+          <form action={handleDeleteSubmit} style={{ display: 'inline' }}>
             <input type="hidden" name="guild_id" value={guild.id} />
             <button
               type="submit"
-              disabled={deletePending}
+              disabled={isDeletePending}
               style={{ ...deleteButtonStyle, padding: '0.4rem 0.8rem', fontSize: '0.875rem' }}
             >
-              {deletePending ? 'Deleting...' : 'Delete'}
+              {isDeletePending ? 'Deleting...' : 'Delete'}
             </button>
           </form>
         </div>

@@ -50,5 +50,36 @@ export default async function AdminUsersPage() {
     );
   }
 
-  return <UserManagementClient users={users ?? []} />;
+  // Get all guilds
+  const { data: guilds, error: guildsError } = await supabase
+    .from('guilds')
+    .select('id, name, game')
+    .order('name', { ascending: true });
+
+  if (guildsError) {
+    console.error('Failed to load guilds', guildsError);
+  }
+
+  // Get all guild memberships
+  const { data: memberships, error: membershipsError } = await supabase
+    .from('guild_members')
+    .select('user_id, guild_id, role, guilds(id, name, game)')
+    .order('joined_at', { ascending: false });
+
+  if (membershipsError) {
+    console.error('Failed to load guild memberships', membershipsError);
+  }
+
+  return (
+    <UserManagementClient
+      users={users ?? []}
+      guilds={(guilds ?? []) as Array<{ id: string; name: string; game: string }>}
+      memberships={(memberships ?? []) as Array<{
+        user_id: string;
+        guild_id: string;
+        role: string;
+        guilds: { id: string; name: string; game: string } | null;
+      }>}
+    />
+  );
 }

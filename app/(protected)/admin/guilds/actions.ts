@@ -79,13 +79,14 @@ export async function createGuild(
 
   // Ensure promo code is unique
   while (attempts < maxAttempts) {
-    const { data: existing } = await admin
+    const { data: existing, error: checkError } = await admin
       .from('guilds')
       .select('id')
       .eq('promo_code', promoCode)
-      .single();
+      .maybeSingle();
 
-    if (!existing) {
+    // If no record found (error or null data), promo code is unique
+    if (checkError || !existing) {
       break;
     }
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from 'next/cache';
-import type { Database, Role } from '@/lib/supabase/database.types';
+import type { Database, Role, GuildRole } from '@/lib/supabase/database.types';
 import { createSupabaseServerActionClient } from '@/lib/supabase/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { normalizeEmail } from '@/lib/validators';
@@ -196,4 +196,110 @@ export async function updateGuildUser(
 
   revalidatePath('/admin/users');
   return { success: `Updated ${displayName}.` };
+}
+
+export async function addUserToGuild(
+  _prevState: UserActionState,
+  formData: FormData
+): Promise<UserActionState> {
+  const adminCheck = await ensureAdmin();
+  if ('error' in adminCheck) {
+    return { error: adminCheck.error };
+  }
+
+  const userId = (formData.get('user_id') as string | null)?.trim() ?? '';
+  const guildId = (formData.get('guild_id') as string | null)?.trim() ?? '';
+  const memberRoleInput = (formData.get('member_role') as string | null)?.trim() ?? 'member';
+  
+  // Validate and cast to GuildRole
+  const memberRole: GuildRole = (memberRoleInput === 'admin' || memberRoleInput === 'owner') 
+    ? memberRoleInput 
+    : 'member';
+
+  if (!userId || !guildId) {
+    return { error: 'User ID and Guild ID are required.' };
+  }
+
+  let adminClient;
+  try {
+    adminClient = createSupabaseAdminClient();
+  } catch (error) {
+    console.error('Admin client unavailable', error);
+    return { error: 'Service role configuration is missing.' };
+  }
+
+  // Add user to guild (using on conflict to handle duplicates gracefully)
+  const guildMemberInsert: Database['public']['Tables']['guild_members']['Insert'] = {
+    user_id: userId,
+    guild_id: guildId,
+    role: memberRole
+  };
+
+  const { error: insertError } = await adminClient
+    .from('guild_members')
+    .insert(guildMemberInsert)
+    .select()
+    .single();
+
+  if (insertError) {
+    // If it's a unique constraint violation, try updating instead
+    if (insertError.code === '23505') {
+      const { error: updateError } = await adminClient
+        .from('guild_members')
+        .update({ role: memberRole })
+        .eq('user_id', userId)
+        .eq('guild_id', guildId);
+
+      if (updateError) {
+        console.error('Update guild member failed', updateError);
+        return { error: 'User is already a member. Failed to update role.' };
+      }
+      revalidatePath('/admin/users');
+      return { success: 'Guild membership updated.' };
+    }
+    console.error('Add guild member failed', insertError);
+    return { error: insertError.message ?? 'Unable to add user to guild.' };
+  }
+
+  revalidatePath('/admin/users');
+  return { success: 'User added to guild successfully.' };
+}
+
+export async function removeUserFromGuild(
+  _prevState: UserActionState,
+  formData: FormData
+): Promise<UserActionState> {
+  const adminCheck = await ensureAdmin();
+  if ('error' in adminCheck) {
+    return { error: adminCheck.error };
+  }
+
+  const userId = (formData.get('user_id') as string | null)?.trim() ?? '';
+  const guildId = (formData.get('guild_id') as string | null)?.trim() ?? '';
+
+  if (!userId || !guildId) {
+    return { error: 'User ID and Guild ID are required.' };
+  }
+
+  let adminClient;
+  try {
+    adminClient = createSupabaseAdminClient();
+  } catch (error) {
+    console.error('Admin client unavailable', error);
+    return { error: 'Service role configuration is missing.' };
+  }
+
+  const { error: deleteError } = await adminClient
+    .from('guild_members')
+    .delete()
+    .eq('user_id', userId)
+    .eq('guild_id', guildId);
+
+  if (deleteError) {
+    console.error('Remove guild member failed', deleteError);
+    return { error: deleteError.message ?? 'Unable to remove user from guild.' };
+  }
+
+  revalidatePath('/admin/users');
+  return { success: 'User removed from guild successfully.' };
 }

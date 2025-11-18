@@ -1,8 +1,7 @@
-import Image from 'next/image';
-import { formatDistanceToNow } from 'date-fns';
 import { SCREENSHOTS_BUCKET } from '@/lib/constants';
 import type { Database } from '@/lib/supabase/database.types';
 import { createSupabaseServerComponentClient } from '@/lib/supabase/server';
+import { ScreenshotCard } from '@/components/gallery/screenshot-card';
 
 export const dynamic = 'force-dynamic';
 
@@ -268,127 +267,15 @@ export default async function GalleryPage() {
                 }}
               >
                 {group.screenshots.map((shot) => (
-                  <article
+                  <ScreenshotCard
                     key={shot.id}
-                    style={{
-                      display: 'grid',
-                      gap: '1rem',
-                      borderRadius: '1rem',
-                      border: '1px solid rgba(148, 163, 184, 0.2)',
-                      background: '#111827',
-                      overflow: 'hidden',
-                      transition: 'border-color 0.2s ease',
-                      cursor: 'pointer'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.4)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.2)';
-                    }}
-                  >
-                    {shot.signedUrl ? (
-                      <div
-                        style={{
-                          position: 'relative',
-                          width: '100%',
-                          paddingBottom: '56.25%',
-                          background: '#0f172a',
-                          overflow: 'hidden'
-                        }}
-                      >
-                        <Image
-                          src={shot.signedUrl}
-                          alt={shot.label ?? 'Screenshot'}
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          style={{
-                            objectFit: 'cover'
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        style={{
-                          height: '180px',
-                          background: '#0f172a',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#f87171'
-                        }}
-                      >
-                        Unable to load image
-                      </div>
-                    )}
-
-                    <div style={{ padding: '1rem', display: 'grid', gap: '0.75rem' }}>
-                      <div style={{ display: 'grid', gap: '0.5rem' }}>
-                        {shot.label && (
-                          <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{shot.label}</h3>
-                        )}
-                        <time style={{ color: '#94a3b8', fontSize: '0.85rem' }}>
-                          {formatDistanceToNow(new Date(shot.created_at), { addSuffix: true })}
-                        </time>
-                      </div>
-
-                      {shot.processing_status === 'completed' && shot.extracted_text ? (
-                        <div
-                          style={{
-                            display: 'grid',
-                            gap: '0.5rem',
-                            borderTop: '1px solid rgba(148, 163, 184, 0.2)',
-                            paddingTop: '0.75rem'
-                          }}
-                        >
-                          <p
-                            style={{
-                              margin: 0,
-                              fontSize: '0.75rem',
-                              textTransform: 'uppercase',
-                              color: '#a78bfa',
-                              fontWeight: 600
-                            }}
-                          >
-                            Extracted Text
-                          </p>
-                          <p
-                            style={{
-                              margin: 0,
-                              fontSize: '0.875rem',
-                              color: '#cbd5f5',
-                              lineHeight: 1.4,
-                              display: '-webkit-box',
-                              WebkitLineClamp: 3,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden'
-                            }}
-                          >
-                            {shot.extracted_text}
-                          </p>
-                        </div>
-                      ) : shot.processing_status === 'pending' ? (
-                        <div
-                          style={{
-                            display: 'grid',
-                            gap: '0.5rem',
-                            borderTop: '1px solid rgba(148, 163, 184, 0.2)',
-                            paddingTop: '0.75rem'
-                          }}
-                        >
-                          <p
-                            style={{
-                              margin: 0,
-                              fontSize: '0.85rem',
-                              color: '#94a3b8'
-                            }}
-                          >
-                            Processing text extraction...
-                          </p>
-                        </div>
-                      ) : null}
-                    </div>
-                  </article>
+                    id={shot.id}
+                    signedUrl={shot.signedUrl}
+                    label={shot.label}
+                    extractedText={shot.extracted_text}
+                    processingStatus={shot.processing_status}
+                    createdAt={shot.created_at}
+                  />
                 ))}
               </div>
             </section>
