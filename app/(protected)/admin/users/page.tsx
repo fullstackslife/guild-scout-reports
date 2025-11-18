@@ -4,6 +4,8 @@ import type { Database } from '@/lib/supabase/database.types';
 import { createSupabaseServerComponentClient } from '@/lib/supabase/server';
 import { UserManagementClient } from './user-management-client';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Manage users | Guild Scout Reports'
 };

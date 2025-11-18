@@ -20,6 +20,7 @@ begin
 end;
 $$ language plpgsql;
 
+drop trigger if exists set_timestamp on public.profiles;
 create trigger set_timestamp
 before update on public.profiles
 for each row
@@ -73,54 +74,14 @@ using (auth.uid() = user_id);
 
 create or replace function public.handle_new_user()
 returns trigger as $$
-declare
-  display_name text;
-  preferred_role text;
 begin
-  set search_path = public;
-
-  display_name := coalesce(new.raw_user_meta_data ->> 'display_name', split_part(coalesce(new.email, 'guildmate'), '@', 1));
-  preferred_role := coalesce(new.raw_user_meta_data ->> 'role', 'member');
-
-  insert into public.profiles (id, email, display_name, username, phone, role, active)
-  values (
-    new.id,
-    coalesce(new.email, ''),
-    display_name,
-    new.raw_user_meta_data ->> 'username',
-    new.raw_user_meta_data ->> 'phone',
-    preferred_role,
-    coalesce((new.raw_user_meta_data ->> 'active')::boolean, true)
-  )
-  on conflict (id) do update
-    set email = excluded.email,
-        display_name = excluded.display_name,
-        username = excluded.username,
-        phone = excluded.phone,
-        role = excluded.role,
-        active = excluded.active;
-
+  -- Profile creation is now handled by application code in signup action
+  -- This function exists as a placeholder for future use
   return new;
 end;
 $$ language plpgsql security definer;
 
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
 
-create or replace function public.handle_user_updated()
-returns trigger as $$
-begin
-  set search_path = public;
-  update public.profiles
-    set email = coalesce(new.email, public.profiles.email)
-  where id = new.id;
-  return new;
-end;
-$$ language plpgsql security definer;
-create trigger on_auth_user_updated
-  after update on auth.users
-  for each row execute procedure public.handle_user_updated();
 
 insert into storage.buckets (id, name, public)
 values ('screenshots', 'screenshots', false)

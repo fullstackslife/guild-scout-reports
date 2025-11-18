@@ -1,11 +1,11 @@
-'use cache': false;
-
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { SignupForm } from './signup-form';
 import type { Database } from '@/lib/supabase/database.types';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Create account | Guild Scout Reports'

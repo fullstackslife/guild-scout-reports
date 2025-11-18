@@ -5,6 +5,8 @@ import { SCREENSHOTS_BUCKET } from '@/lib/constants';
 import type { Database } from '@/lib/supabase/database.types';
 import { createSupabaseServerComponentClient } from '@/lib/supabase/server';
 
+export const dynamic = 'force-dynamic';
+
 type ScreenshotRow = Database['public']['Tables']['screenshots']['Row'];
 type ScreenshotWithUrl = ScreenshotRow & { signedUrl: string | null };
 
