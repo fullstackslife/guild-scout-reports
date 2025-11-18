@@ -230,28 +230,52 @@ export function DashboardClient({ userGuilds, screenshots, selectedGuildId }: Da
                 
                 {/* Action buttons */}
                 <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                  <button
-                    onClick={() => router.push(`/scout-reports/${shot.id}`)}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      borderRadius: '0.5rem',
-                      background: '#3b82f6',
-                      color: '#fff',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      fontSize: '0.875rem',
-                      transition: 'background 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#2563eb';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#3b82f6';
-                    }}
-                  >
-                    📊 Enter Scout Data
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <button
+                      onClick={() => router.push(`/scout-reports/entry?screenshot_id=${shot.id}`)}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        borderRadius: '0.5rem',
+                        background: '#3b82f6',
+                        color: '#fff',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        fontSize: '0.875rem',
+                        transition: 'background 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#2563eb';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#3b82f6';
+                      }}
+                    >
+                      📝 Data Entry
+                    </button>
+                    <button
+                      onClick={() => router.push(`/scout-reports/validation?screenshot_id=${shot.id}`)}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        borderRadius: '0.5rem',
+                        background: '#10b981',
+                        color: '#fff',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        fontSize: '0.875rem',
+                        transition: 'background 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#059669';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#10b981';
+                      }}
+                    >
+                      ✓ Validate
+                    </button>
+                  </div>
                   {shot.processing_status === 'completed' && shot.extracted_text && (
                     <span style={{
                       padding: '0.5rem 1rem',

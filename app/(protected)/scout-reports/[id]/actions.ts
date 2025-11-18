@@ -211,6 +211,8 @@ export async function createScoutReport(
     }
 
     revalidatePath("/scout-reports");
+    revalidatePath("/scout-reports/entry");
+    revalidatePath("/scout-reports/validation");
     revalidatePath("/dashboard");
     
     return {
