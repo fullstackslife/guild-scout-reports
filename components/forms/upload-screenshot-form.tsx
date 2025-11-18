@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useTransition } from 'react';
+import { useEffect, useRef } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { uploadScreenshot, type UploadState } from '@/app/(protected)/dashboard/actions';
 
@@ -31,7 +31,6 @@ function SubmitButton() {
 export function UploadScreenshotForm() {
   const [state, formAction] = useFormState(uploadScreenshot, initialState);
   const formRef = useRef<HTMLFormElement | null>(null);
-  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     if (state?.success && formRef.current) {
@@ -42,11 +41,7 @@ export function UploadScreenshotForm() {
   return (
     <form
       ref={formRef}
-      action={(formData: FormData) =>
-        startTransition(async () => {
-          await formAction(formData);
-        })
-      }
+      action={formAction}
       style={{
         display: 'grid',
         gap: '1rem',

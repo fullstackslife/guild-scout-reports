@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { formatDistanceToNow } from 'date-fns';
 import { UploadScreenshotForm } from '@/components/forms/upload-screenshot-form';
 import { SCREENSHOTS_BUCKET } from '@/lib/constants';
@@ -88,11 +89,15 @@ export default async function DashboardPage() {
                   </div>
                 </div>
                 {shot.signedUrl ? (
-                  <img
+                  <Image
                     src={shot.signedUrl}
                     alt={shot.label ?? 'Screenshot upload'}
+                    width={1200}
+                    height={720}
+                    sizes="(max-width: 768px) 100vw, 900px"
                     style={{
                       width: '100%',
+                      height: 'auto',
                       maxHeight: '420px',
                       objectFit: 'contain',
                       borderRadius: '0.75rem',
