@@ -21,14 +21,26 @@ export default async function ProtectedLayout({
     redirect('/login');
   }
 
-  const { data: rawProfile } = await supabase
+  const { data: rawProfile, error: profileError } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', session.user.id)
     .single();
 
+  if (profileError) {
+    console.error('Profile lookup error:', profileError);
+    // If profile lookup fails, sign out and redirect to login
+    await supabase.auth.signOut();
+    redirect('/login?reason=profile_error');
+  }
+
   const profile = rawProfile as Database['public']['Tables']['profiles']['Row'] | null;
   if (!profile || !profile.active) {
+    console.error('Profile not found or inactive:', { 
+      hasProfile: !!profile, 
+      active: profile?.active,
+      userId: session.user.id 
+    });
     await supabase.auth.signOut();
     redirect('/login?reason=inactive');
   }

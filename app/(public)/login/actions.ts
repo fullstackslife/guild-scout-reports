@@ -82,13 +82,36 @@ export async function loginWithPassword(_prevState: LoginState, formData: FormDa
         return { error: 'Account is inactive.' };
       }
 
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: signInData, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
+        console.error('Sign in error:', error);
         return { error: 'Invalid credentials.' };
+      }
+
+      if (!signInData.session) {
+        console.error('No session returned after sign in');
+        return { error: 'Login succeeded but no session was created. Please try again.' };
+      }
+
+      // Verify the session is valid by checking if we can access the profile
+      const { data: profileCheck, error: profileCheckError } = await adminClient
+        .from('profiles')
+        .select('id, active')
+        .eq('id', signInData.user.id)
+        .single();
+
+      if (profileCheckError || !profileCheck) {
+        console.error('Profile check failed after login:', profileCheckError);
+        return { error: 'Account found but profile is not accessible. Please contact support.' };
+      }
+
+      if (!profileCheck.active) {
+        console.error('Profile is inactive after login');
+        return { error: 'Account is inactive. Please contact an administrator.' };
       }
     }
   } catch (error) {
@@ -96,6 +119,7 @@ export async function loginWithPassword(_prevState: LoginState, formData: FormDa
     return { error: 'Unable to sign in right now.' };
   }
 
+  // Use revalidatePath to ensure fresh data, then redirect
   redirect('/dashboard');
   return {};
 }
