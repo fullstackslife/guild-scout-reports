@@ -7,6 +7,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 export type SignupState = {
   error?: string;
   success?: boolean;
+  message?: string;
 };
 
 export async function signupWithEmail(
@@ -60,35 +61,6 @@ export async function signupWithEmail(
 
     userId = data.user.id;
 
-    // Auto-confirm email using the Edge Function
-    try {
-      const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      
-      if (projectUrl && anonKey) {
-        const response = await fetch(`${projectUrl}/functions/v1/auto-confirm-email`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${anonKey}`,
-          },
-          body: JSON.stringify({
-            user_id: userId,
-            email: email,
-          }),
-        });
-
-        const result = await response.json();
-        if (!response.ok) {
-          console.error('Email confirmation failed:', result.error);
-          // Continue anyway - user is created, might just need email confirmation
-        }
-      }
-    } catch (error) {
-      console.error('Email confirmation Edge Function call error:', error);
-      // Continue anyway - user is created
-    }
-
     // Create the profile manually using admin client
     try {
       const { error: profileError } = await adminClient
@@ -114,23 +86,9 @@ export async function signupWithEmail(
     return { error: 'Unable to create account right now.' };
   }
 
-  // Sign in the newly created user
-  try {
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (signInError) {
-      console.error('Sign in after signup error:', signInError);
-      // Account was created but sign in failed, redirect to login
-      redirect('/login');
-    }
-  } catch (error) {
-    console.error('Sign in error:', error);
-    redirect('/login');
-  }
-
-  redirect('/dashboard');
-  return { success: true };
+  // Return a message asking user to check email for confirmation
+  return {
+    success: true,
+    message: `Account created! Please check your email at ${email} for a confirmation link to complete your signup.`
+  };
 }

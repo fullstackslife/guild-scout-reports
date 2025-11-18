@@ -125,9 +125,15 @@ export function SignupForm() {
         <div style={{ color: '#f87171', fontSize: '0.95rem' }}>{state.error}</div>
       ) : null}
 
+      {state.success && state.message ? (
+        <div style={{ color: '#86efac', fontSize: '0.95rem' }}>
+          {state.message}
+        </div>
+      ) : null}
+
       {state.success ? (
         <div style={{ color: '#86efac', fontSize: '0.95rem' }}>
-          Account created! Redirecting to dashboard...
+          Once you confirm your email, you can log in.
         </div>
       ) : null}
 
