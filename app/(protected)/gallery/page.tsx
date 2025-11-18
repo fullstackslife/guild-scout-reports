@@ -53,21 +53,47 @@ export default async function GalleryPage() {
     currentGuild = (guildData as GuildRow | null);
   }
 
-  // Fetch screenshots from user's guild(s)
+  // Fetch screenshots from user's guild(s) or screenshots without guild_id
   let screenshots: ScreenshotRow[] | null = null;
   let screenshotError = null;
   
   if (userGuildIds.length > 0) {
+    // Get screenshots from user's guilds OR screenshots without guild_id (legacy/backward compatibility)
+    // Use two queries and combine results for better compatibility
+    const [guildScreenshots, legacyScreenshots] = await Promise.all([
+      supabase
+        .from('screenshots')
+        .select('id, file_path, label, extracted_text, processing_status, created_at, user_id, guild_id')
+        .in('guild_id', userGuildIds)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('screenshots')
+        .select('id, file_path, label, extracted_text, processing_status, created_at, user_id, guild_id')
+        .is('guild_id', null)
+        .order('created_at', { ascending: false })
+    ]);
+    
+    // Combine results, removing duplicates
+    const guildData = (guildScreenshots.data ?? []) as ScreenshotRow[];
+    const legacyData = (legacyScreenshots.data ?? []) as ScreenshotRow[];
+    const combined = [...guildData, ...legacyData];
+    
+    // Remove duplicates by id and sort by created_at
+    const uniqueScreenshots = Array.from(
+      new Map(combined.map(s => [s.id, s])).values()
+    ).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    
+    screenshots = uniqueScreenshots;
+    screenshotError = guildScreenshots.error || legacyScreenshots.error;
+  } else {
+    // No guilds - show screenshots without guild_id (backward compatibility)
     const result = await supabase
       .from('screenshots')
       .select('id, file_path, label, extracted_text, processing_status, created_at, user_id, guild_id')
-      .in('guild_id', userGuildIds)
+      .is('guild_id', null)
       .order('created_at', { ascending: false });
     screenshots = result.data;
     screenshotError = result.error;
-  } else {
-    // No guilds - return empty array
-    screenshots = [];
   }
 
   if (screenshotError) {

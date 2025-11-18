@@ -13,7 +13,8 @@ interface AppShellProps {
 
 const navItems = [
   { href: '/dashboard', label: 'My Screenshots' },
-  { href: '/gallery', label: 'Guild Gallery' }
+  { href: '/gallery', label: 'Guild Gallery' },
+  { href: '/profile', label: 'Profile' }
 ];
 
 export function AppShell({ profile, children }: AppShellProps) {
