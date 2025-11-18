@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Guild Scout Reports',
+  title: 'Warbot.app',
   description: 'Private guild dashboard for sharing scouting screenshots.'
 };
 

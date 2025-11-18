@@ -1,10 +1,10 @@
 # Deployment Guide
 
-Complete instructions for deploying Guild Scout Reports to production.
+Complete instructions for deploying Warbot.app to production.
 
 ## Overview
 
-Guild Scout Reports can be deployed to multiple platforms:
+Warbot.app can be deployed to multiple platforms:
 
 1. **Vercel** ⭐ Recommended - Easiest setup
 2. **Docker** - For any platform (AWS, GCP, Azure, Digital Ocean)
@@ -58,7 +58,7 @@ git push origin main
 1. Go to [vercel.com/new](https://vercel.com/new)
 2. Click "Import Git Repository"
 3. Authorize GitHub access
-4. Select `guild-scout-reports` repository
+4. Select `warbot-app` repository
 5. Click "Import"
 
 #### 3. Configure Environment Variables
@@ -84,7 +84,7 @@ NEXTAUTH_SECRET=your-secret-here
 
 1. Click "Deploy"
 2. Wait for build to complete (3-5 minutes)
-3. You'll get a URL like `guild-scout-reports.vercel.app`
+3. You'll get a URL like `warbot-app.vercel.app`
 
 #### 5. Post-Deployment
 
@@ -161,7 +161,7 @@ CMD ["npm", "start"]
 ### Step 2: Build Image
 
 ```bash
-docker build -t guild-scout-reports:latest .
+docker build -t warbot-app:latest .
 ```
 
 ### Step 3: Test Locally
@@ -174,7 +174,7 @@ docker run -p 3000:3000 \
   -e SUPABASE_DATABASE_URL=your_db_url \
   -e ANTHROPIC_API_KEY=your_key \
   -e NEXTAUTH_SECRET=your_secret \
-  guild-scout-reports:latest
+  warbot-app:latest
 ```
 
 Visit [http://localhost:3000](http://localhost:3000)
@@ -186,10 +186,10 @@ Visit [http://localhost:3000](http://localhost:3000)
 docker login
 
 # Tag image
-docker tag guild-scout-reports:latest yourusername/guild-scout-reports:latest
+docker tag warbot-app:latest yourusername/warbot-app:latest
 
 # Push
-docker push yourusername/guild-scout-reports:latest
+docker push yourusername/warbot-app:latest
 ```
 
 ### Step 5: Deploy to Server
@@ -197,10 +197,10 @@ docker push yourusername/guild-scout-reports:latest
 #### On your server:
 
 ```bash
-docker pull yourusername/guild-scout-reports:latest
+docker pull yourusername/warbot-app:latest
 
 docker run -d \
-  --name guild-scout-reports \
+  --name warbot-app \
   -p 80:3000 \
   -e NEXT_PUBLIC_SUPABASE_URL=your_url \
   -e NEXT_PUBLIC_SUPABASE_ANON_KEY=your_key \
@@ -208,7 +208,7 @@ docker run -d \
   -e SUPABASE_DATABASE_URL=your_db_url \
   -e ANTHROPIC_API_KEY=your_key \
   -e NEXTAUTH_SECRET=your_secret \
-  yourusername/guild-scout-reports:latest
+  yourusername/warbot-app:latest
 ```
 
 Your app is now running on port 80!
@@ -222,7 +222,7 @@ version: '3.8'
 
 services:
   app:
-    image: yourusername/guild-scout-reports:latest
+    image: yourusername/warbot-app:latest
     ports:
       - "3000:3000"
     environment:
@@ -271,15 +271,15 @@ sudo apt install -y nodejs npm
 sudo apt install -y git
 
 # Create app directory
-sudo mkdir -p /var/www/guild-scout-reports
-cd /var/www/guild-scout-reports
+sudo mkdir -p /var/www/warbot-app
+cd /var/www/warbot-app
 ```
 
 ### Step 2: Clone and Setup
 
 ```bash
 # Clone repository
-sudo git clone https://github.com/youruser/guild-scout-reports.git .
+sudo git clone https://github.com/youruser/warbot-app.git .
 
 # Install dependencies
 sudo npm install --production
@@ -300,7 +300,7 @@ sudo npm run build
 sudo npm install -g pm2
 
 # Start app
-sudo pm2 start npm --name "guild-scout-reports" -- start
+sudo pm2 start npm --name "warbot-app" -- start
 
 # Configure PM2 to restart on reboot
 sudo pm2 startup systemd -u root --hp /root
@@ -314,7 +314,7 @@ sudo pm2 save
 sudo apt install -y nginx
 
 # Create config
-sudo nano /etc/nginx/sites-available/guild-scout-reports
+sudo nano /etc/nginx/sites-available/warbot-app
 ```
 
 Paste this configuration:
@@ -338,7 +338,7 @@ server {
 
 ```bash
 # Enable site
-sudo ln -s /etc/nginx/sites-available/guild-scout-reports /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/warbot-app /etc/nginx/sites-enabled/
 
 # Test config
 sudo nginx -t
@@ -373,7 +373,7 @@ sudo pm2 monit
 ### Updates
 
 ```bash
-cd /var/www/guild-scout-reports
+cd /var/www/warbot-app
 git pull origin main
 npm install
 npm run build
@@ -393,11 +393,11 @@ sudo pm2 restart all
 
 ```bash
 # Build image
-gcloud builds submit --tag gcr.io/PROJECT_ID/guild-scout-reports
+gcloud builds submit --tag gcr.io/PROJECT_ID/warbot-app
 
 # Deploy
-gcloud run deploy guild-scout-reports \
-  --image gcr.io/PROJECT_ID/guild-scout-reports \
+gcloud run deploy warbot-app \
+  --image gcr.io/PROJECT_ID/warbot-app \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated \
@@ -408,13 +408,13 @@ gcloud run deploy guild-scout-reports \
 
 ```bash
 # Build and push
-az acr build --registry MyRegistry --image guild-scout-reports:latest .
+az acr build --registry MyRegistry --image warbot-app:latest .
 
 # Deploy
 az container create \
   --resource-group MyGroup \
-  --name guild-scout-reports \
-  --image MyRegistry.azurecr.io/guild-scout-reports:latest \
+  --name warbot-app \
+  --image MyRegistry.azurecr.io/warbot-app:latest \
   --environment-variables NEXT_PUBLIC_SUPABASE_URL=your_url
 ```
 
@@ -442,7 +442,7 @@ After deploying:
 
 **Docker:**
 ```bash
-docker logs -f guild-scout-reports
+docker logs -f warbot-app
 ```
 
 **Self-Hosted:**
@@ -488,7 +488,7 @@ npm install
 npm run build
 
 # Restart (Vercel automatic, Docker/PM2 manual)
-docker restart guild-scout-reports
+docker restart warbot-app
 # or
 pm2 restart all
 ```

@@ -42,7 +42,7 @@ export function AppShell({ profile, children }: AppShellProps) {
         }}
       >
         <div>
-          <strong>Guild Scout Reports</strong>
+          <strong>Warbot.app</strong>
           <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{profile.display_name}</div>
         </div>
         <nav style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>

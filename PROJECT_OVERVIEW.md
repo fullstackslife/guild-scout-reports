@@ -1,8 +1,8 @@
-# Guild Scout Reports - Project Overview
+# Warbot.app - Project Overview
 
 ## What Is This Project?
 
-**Guild Scout Reports** is a web application designed for gaming guilds to share, organize, and analyze game screenshots (scout reports). It provides:
+**Warbot.app** is a web application designed for gaming guilds to share, organize, and analyze game screenshots (scout reports). It provides:
 
 - 🔐 Secure user authentication
 - 📸 Screenshot upload and storage

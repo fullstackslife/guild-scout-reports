@@ -1,6 +1,6 @@
 # Documentation Index
 
-Welcome to Guild Scout Reports! This guide will help you navigate all the documentation available for this project.
+Welcome to Warbot.app! This guide will help you navigate all the documentation available for this project.
 
 ## 📋 Quick Navigation
 

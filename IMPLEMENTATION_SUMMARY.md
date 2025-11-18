@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document summarizes all changes made to build the Guild Scout Reports system with a complete gallery feature and OCR text extraction capabilities.
+This document summarizes all changes made to build the Warbot.app system with a complete gallery feature and OCR text extraction capabilities.
 
 ## Files Created
 

@@ -7,7 +7,7 @@ import { UserManagementClient } from './user-management-client';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Manage users | Guild Scout Reports'
+  title: 'Manage users | Warbot.app'
 };
 
 export default async function AdminUsersPage() {

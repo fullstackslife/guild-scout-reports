@@ -8,7 +8,7 @@ import type { Database } from '@/lib/supabase/database.types';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Sign in | Guild Scout Reports'
+  title: 'Sign in | Warbot.app'
 };
 
 export default async function LoginPage() {

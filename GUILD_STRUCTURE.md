@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the multi-guild architecture implemented in the Guild Scout Reports application. The system now supports multiple guilds with different games, allowing users to be members of one or more guilds.
+This document describes the multi-guild architecture implemented in the Warbot.app application. The system now supports multiple guilds with different games, allowing users to be members of one or more guilds.
 
 ## Database Schema
 

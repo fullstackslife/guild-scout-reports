@@ -3,7 +3,7 @@
 ## Root Directory Overview
 
 ```
-guild-scout-reports/
+warbot-app/
 │
 ├── 📋 DOCUMENTATION (10 files)
 │   ├── START_HERE.md                    ← 👈 Start here!
@@ -221,7 +221,7 @@ guild-scout-reports/
 
 ### Absolute First Step
 ```bash
-cd guild-scout-reports
+cd warbot-app
 cat START_HERE.md  # Read this first
 ```
 

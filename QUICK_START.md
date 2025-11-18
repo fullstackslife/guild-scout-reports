@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get Guild Scout Reports running in 5 minutes.
+Get Warbot.app running in 5 minutes.
 
 ## Prerequisites
 
@@ -12,8 +12,8 @@ Get Guild Scout Reports running in 5 minutes.
 ### 1. Clone & Install (1 minute)
 
 ```bash
-git clone https://github.com/fullstackslife/guild-scout-reports.git
-cd guild-scout-reports
+git clone https://github.com/fullstackslife/warbot-app.git
+cd warbot-app
 npm install
 ```
 
@@ -140,8 +140,8 @@ supabase/              # Database migrations
 ### Docker
 
 ```bash
-docker build -t guild-scout-reports .
-docker run -p 3000:3000 -e NEXT_PUBLIC_SUPABASE_URL=... guild-scout-reports
+docker build -t warbot-app .
+docker run -p 3000:3000 -e NEXT_PUBLIC_SUPABASE_URL=... warbot-app
 ```
 
 ## Getting Help

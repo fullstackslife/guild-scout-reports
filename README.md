@@ -1,10 +1,10 @@
-# Guild Scout Reports
+# Warbot.app
 
 A private guild dashboard for sharing and analyzing scouting screenshots with automatic text extraction capabilities.
 
 ## Overview
 
-Guild Scout Reports is a Next.js-based application that allows guild members to upload, organize, and share game scouting screenshots. The platform features:
+Warbot.app is a Next.js-based application that allows guild members to upload, organize, and share game scouting screenshots. The platform features:
 
 - **User Authentication**: Secure login and signup with Supabase Auth
 - **Screenshot Management**: Upload, view, and delete screenshots with descriptions
@@ -25,7 +25,7 @@ Guild Scout Reports is a Next.js-based application that allows guild members to 
 ## Project Structure
 
 ```
-guild-scout-reports/
+warbot-app/
 ├── app/
 │   ├── (public)/
 │   │   ├── login/
@@ -77,8 +77,8 @@ guild-scout-reports/
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/fullstackslife/guild-scout-reports.git
-cd guild-scout-reports
+git clone https://github.com/fullstackslife/warbot-app.git
+cd warbot-app
 ```
 
 2. **Install dependencies**

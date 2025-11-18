@@ -2,7 +2,7 @@
 
 ## What Was Built
 
-A complete **Guild Scout Reports** system with gallery, screenshot upload, and OCR text extraction.
+A complete **Warbot.app** system with gallery, screenshot upload, and OCR text extraction.
 
 ## 📦 Deliverables
 
@@ -207,8 +207,8 @@ Choose one:
 
 **Docker**:
 ```bash
-docker build -t guild-scout-reports .
-docker run -p 3000:3000 -e ... guild-scout-reports
+docker build -t warbot-app .
+docker run -p 3000:3000 -e ... warbot-app
 ```
 
 **Self-hosted**:

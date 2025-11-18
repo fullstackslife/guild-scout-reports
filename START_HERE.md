@@ -1,4 +1,4 @@
-# 🎉 Guild Scout Reports - Complete Implementation Summary
+# 🎉 Warbot.app - Complete Implementation Summary
 
 ## What You Now Have
 
@@ -153,8 +153,8 @@ git push origin feature/your-feature
 
 ### Alternative: Docker
 ```bash
-docker build -t guild-scout-reports .
-docker run -p 3000:3000 -e NEXT_PUBLIC_SUPABASE_URL=... guild-scout-reports
+docker build -t warbot-app .
+docker run -p 3000:3000 -e NEXT_PUBLIC_SUPABASE_URL=... warbot-app
 ```
 
 ## ⚡ Performance

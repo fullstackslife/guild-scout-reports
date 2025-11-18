@@ -1,10 +1,10 @@
-# Copilot Instructions for Guild Scout Reports
+# Copilot Instructions for Warbot.app
 
-This document provides guidance for GitHub Copilot and AI assistants working on the Guild Scout Reports project.
+This document provides guidance for GitHub Copilot and AI assistants working on the Warbot.app project.
 
 ## Project Context
 
-**Guild Scout Reports** is a Next.js 14 application for managing guild scouting screenshots with:
+**Warbot.app** is a Next.js 14 application for managing guild scouting screenshots with:
 - Supabase for authentication and database
 - Supabase Storage for file uploads
 - Anthropic Claude API for OCR text extraction
@@ -526,4 +526,4 @@ perf: optimize gallery image loading
 ---
 
 **Last Updated**: November 2025
-**Created By**: Guild Scout Reports Team
+**Created By**: Warbot.app Team

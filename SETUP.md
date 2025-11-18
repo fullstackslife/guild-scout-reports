@@ -1,6 +1,6 @@
-# Guild Scout Reports - Complete Setup Guide
+# Warbot.app - Complete Setup Guide
 
-This guide will help you get Guild Scout Reports up and running locally and in production.
+This guide will help you get Warbot.app up and running locally and in production.
 
 ## Table of Contents
 
@@ -36,8 +36,8 @@ Before you start, ensure you have:
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/fullstackslife/guild-scout-reports.git
-cd guild-scout-reports
+git clone https://github.com/fullstackslife/warbot-app.git
+cd warbot-app
 ```
 
 ### Step 2: Install Dependencies
@@ -60,7 +60,7 @@ This installs all required packages including:
 1. Go to [app.supabase.com](https://app.supabase.com)
 2. Click "New Project"
 3. Fill in the details:
-   - Project name: `guild-scout-reports` (or your choice)
+   - Project name: `warbot-app` (or your choice)
    - Database password: Use a strong password (saved for later)
    - Region: Choose closest to your location
 4. Click "Create new project"
@@ -359,7 +359,7 @@ CMD ["npm", "start"]
 
 ```bash
 # Build image
-docker build -t guild-scout-reports .
+docker build -t warbot-app .
 
 # Run container
 docker run -p 3000:3000 \
@@ -369,7 +369,7 @@ docker run -p 3000:3000 \
   -e SUPABASE_DATABASE_URL=your_url \
   -e ANTHROPIC_API_KEY=your_key \
   -e NEXTAUTH_SECRET=your_secret \
-  guild-scout-reports
+  warbot-app
 ```
 
 ### Option 3: Self-Hosted (VPS/Server)
@@ -386,8 +386,8 @@ sudo apt install -y nodejs
 
 # Clone repository
 cd /var/www
-git clone https://github.com/youruser/guild-scout-reports.git
-cd guild-scout-reports
+git clone https://github.com/youruser/warbot-app.git
+cd warbot-app
 
 # Install dependencies
 npm install --production
@@ -403,7 +403,7 @@ npm run build
 sudo npm install -g pm2
 
 # Start app
-pm2 start npm --name "guild-scout-reports" -- start
+pm2 start npm --name "warbot-app" -- start
 
 # Configure to restart on reboot
 pm2 startup
