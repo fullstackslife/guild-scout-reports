@@ -39,6 +39,7 @@ export async function signupWithEmail(
   const adminClient = createSupabaseAdminClient();
 
   // Sign up the user
+  let userId: string | undefined;
   try {
     const { data, error: signupError } = await supabase.auth.signUp({
       email,
@@ -57,13 +58,44 @@ export async function signupWithEmail(
       return { error: 'Unable to create account. Please try again.' };
     }
 
+    userId = data.user.id;
+
+    // Auto-confirm email using the Edge Function
+    try {
+      const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      
+      if (projectUrl && anonKey) {
+        const response = await fetch(`${projectUrl}/functions/v1/auto-confirm-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${anonKey}`,
+          },
+          body: JSON.stringify({
+            user_id: userId,
+            email: email,
+          }),
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+          console.error('Email confirmation failed:', result.error);
+          // Continue anyway - user is created, might just need email confirmation
+        }
+      }
+    } catch (error) {
+      console.error('Email confirmation Edge Function call error:', error);
+      // Continue anyway - user is created
+    }
+
     // Create the profile manually using admin client
     try {
       const { error: profileError } = await adminClient
         .from('profiles')
         .insert({
-          id: data.user.id,
-          email: data.user.email || '',
+          id: userId,
+          email: email || '',
           display_name: displayName,
           role: 'member',
           active: true
