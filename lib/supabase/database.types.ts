@@ -191,6 +191,239 @@ export interface Database {
           }
         ];
       };
+      scout_reports: {
+        Row: {
+          id: string;
+          screenshot_id: string;
+          user_id: string;
+          guild_id: string | null;
+          target_name: string | null;
+          target_guild: string | null;
+          coordinates: string | null;
+          might: number | null;
+          leader_present: boolean | null;
+          anti_scout_active: boolean | null;
+          wall_hp: number | null;
+          traps_total: number | null;
+          traps_types: string | null;
+          wall_heroes_count: number | null;
+          wall_heroes_details: string | null;
+          wall_familiars: string | null;
+          active_boosts: string | null;
+          total_troops: number | null;
+          troop_breakdown: string | null;
+          reinforcements_count: number | null;
+          reinforcements_details: string | null;
+          garrisons_count: number | null;
+          garrisons_details: string | null;
+          coalition_inside: boolean | null;
+          coalition_details: string | null;
+          wounded_in_infirmary: number | null;
+          damaged_traps_count: number | null;
+          retrieve_traps_info: string | null;
+          resources_food: number | null;
+          resources_stone: number | null;
+          resources_ore: number | null;
+          resources_timber: number | null;
+          resources_gold: number | null;
+          resources_above_vault: string | null;
+          worth_it_farming: boolean | null;
+          worth_it_kills: boolean | null;
+          parsed_data: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          screenshot_id: string;
+          user_id: string;
+          guild_id?: string | null;
+          target_name?: string | null;
+          target_guild?: string | null;
+          coordinates?: string | null;
+          might?: number | null;
+          leader_present?: boolean | null;
+          anti_scout_active?: boolean | null;
+          wall_hp?: number | null;
+          traps_total?: number | null;
+          traps_types?: string | null;
+          wall_heroes_count?: number | null;
+          wall_heroes_details?: string | null;
+          wall_familiars?: string | null;
+          active_boosts?: string | null;
+          total_troops?: number | null;
+          troop_breakdown?: string | null;
+          reinforcements_count?: number | null;
+          reinforcements_details?: string | null;
+          garrisons_count?: number | null;
+          garrisons_details?: string | null;
+          coalition_inside?: boolean | null;
+          coalition_details?: string | null;
+          wounded_in_infirmary?: number | null;
+          damaged_traps_count?: number | null;
+          retrieve_traps_info?: string | null;
+          resources_food?: number | null;
+          resources_stone?: number | null;
+          resources_ore?: number | null;
+          resources_timber?: number | null;
+          resources_gold?: number | null;
+          resources_above_vault?: string | null;
+          worth_it_farming?: boolean | null;
+          worth_it_kills?: boolean | null;
+          parsed_data?: string | null;
+        };
+        Update: {
+          screenshot_id?: string;
+          user_id?: string;
+          guild_id?: string | null;
+          target_name?: string | null;
+          target_guild?: string | null;
+          coordinates?: string | null;
+          might?: number | null;
+          leader_present?: boolean | null;
+          anti_scout_active?: boolean | null;
+          wall_hp?: number | null;
+          traps_total?: number | null;
+          traps_types?: string | null;
+          wall_heroes_count?: number | null;
+          wall_heroes_details?: string | null;
+          wall_familiars?: string | null;
+          active_boosts?: string | null;
+          total_troops?: number | null;
+          troop_breakdown?: string | null;
+          reinforcements_count?: number | null;
+          reinforcements_details?: string | null;
+          garrisons_count?: number | null;
+          garrisons_details?: string | null;
+          coalition_inside?: boolean | null;
+          coalition_details?: string | null;
+          wounded_in_infirmary?: number | null;
+          damaged_traps_count?: number | null;
+          retrieve_traps_info?: string | null;
+          resources_food?: number | null;
+          resources_stone?: number | null;
+          resources_ore?: number | null;
+          resources_timber?: number | null;
+          resources_gold?: number | null;
+          resources_above_vault?: string | null;
+          worth_it_farming?: boolean | null;
+          worth_it_kills?: boolean | null;
+          parsed_data?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'scout_reports_screenshot_id_fkey';
+            columns: ['screenshot_id'];
+            referencedRelation: 'screenshots';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'scout_reports_user_id_fkey';
+            columns: ['user_id'];
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'scout_reports_guild_id_fkey';
+            columns: ['guild_id'];
+            referencedRelation: 'guilds';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      scout_report_credibility: {
+        Row: {
+          id: string;
+          user_id: string;
+          guild_id: string | null;
+          total_entries: number;
+          accurate_entries: number;
+          accuracy_percentage: number;
+          reliability_tier: string | null;
+          field_accuracy: string | null;
+          last_calculated_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          guild_id?: string | null;
+          total_entries?: number;
+          accurate_entries?: number;
+          accuracy_percentage?: number;
+          reliability_tier?: string | null;
+          field_accuracy?: string | null;
+          last_calculated_at?: string | null;
+        };
+        Update: {
+          user_id?: string;
+          guild_id?: string | null;
+          total_entries?: number;
+          accurate_entries?: number;
+          accuracy_percentage?: number;
+          reliability_tier?: string | null;
+          field_accuracy?: string | null;
+          last_calculated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'scout_report_credibility_user_id_fkey';
+            columns: ['user_id'];
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'scout_report_credibility_guild_id_fkey';
+            columns: ['guild_id'];
+            referencedRelation: 'guilds';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      scout_report_validations: {
+        Row: {
+          id: string;
+          scout_report_id: string;
+          user_id: string;
+          fields_compared: string | null;
+          overall_match_percentage: number | null;
+          fields_that_differed: string[] | null;
+          user_corrections: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          scout_report_id: string;
+          user_id: string;
+          fields_compared?: string | null;
+          overall_match_percentage?: number | null;
+          fields_that_differed?: string[] | null;
+          user_corrections?: string | null;
+        };
+        Update: {
+          scout_report_id?: string;
+          user_id?: string;
+          fields_compared?: string | null;
+          overall_match_percentage?: number | null;
+          fields_that_differed?: string[] | null;
+          user_corrections?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'scout_report_validations_scout_report_id_fkey';
+            columns: ['scout_report_id'];
+            referencedRelation: 'scout_reports';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'scout_report_validations_user_id_fkey';
+            columns: ['user_id'];
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
