@@ -29,26 +29,28 @@ export default async function GalleryPage() {
     return null;
   }
 
-  // Fetch all screenshots with uploader info
-  const { data: screenshots } = await supabase
+  // Fetch all screenshots
+  const { data: screenshots, error: screenshotError } = await supabase
     .from('screenshots')
-    .select(
-      `
-      id,
-      file_path,
-      label,
-      extracted_text,
-      processing_status,
-      created_at,
-      user_id,
-      profiles:user_id (display_name)
-    `
-    )
+    .select('id, file_path, label, extracted_text, processing_status, created_at, user_id')
     .order('created_at', { ascending: false });
 
-  const screenshotList = (screenshots ?? []) as (ScreenshotRow & {
-    profiles: { display_name: string } | null;
-  })[];
+  if (screenshotError) {
+    console.error('Gallery query error:', screenshotError);
+  }
+
+  // Fetch all profiles
+  const { data: profiles, error: profileError } = await supabase
+    .from('profiles')
+    .select('id, display_name');
+
+  if (profileError) {
+    console.error('Profile query error:', profileError);
+  }
+
+  const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p.display_name]));
+
+  const screenshotList = (screenshots ?? []) as ScreenshotRow[];
 
   // Generate signed URLs
   const signedUrls: ScreenshotWithMeta[] = await Promise.all(
@@ -60,7 +62,7 @@ export default async function GalleryPage() {
       return {
         ...shot,
         signedUrl: data?.signedUrl ?? null,
-        uploaderName: shot.profiles?.display_name ?? 'Unknown'
+        uploaderName: profileMap.get(shot.user_id) ?? 'Unknown'
       } satisfies ScreenshotWithMeta;
     })
   );
