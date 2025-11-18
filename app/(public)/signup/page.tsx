@@ -4,14 +4,14 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { LoginForm } from './login-form';
+import { SignupForm } from './signup-form';
 import type { Database } from '@/lib/supabase/database.types';
 
 export const metadata: Metadata = {
-  title: 'Sign in | Guild Scout Reports'
+  title: 'Create account | Guild Scout Reports'
 };
 
-export default async function LoginPage() {
+export default async function SignupPage() {
   const supabase = createServerComponentClient<Database>({ cookies });
   const {
     data: { session }
@@ -32,15 +32,15 @@ export default async function LoginPage() {
       }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
-        <h1 style={{ margin: 0, fontSize: '2rem' }}>Welcome back</h1>
+        <h1 style={{ margin: 0, fontSize: '2rem' }}>Create your account</h1>
         <p style={{ margin: 0, color: '#94a3b8', textAlign: 'center', maxWidth: '420px' }}>
-          Sign in to access guild scouting reports and upload your latest screenshots.
+          Join to upload and share guild scouting screenshots.
         </p>
-        <LoginForm />
+        <SignupForm />
         <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.9rem', textAlign: 'center' }}>
-          Don't have an account?{' '}
-          <a href="/signup" style={{ color: '#38bdf8', textDecoration: 'none' }}>
-            Create one here
+          Already have an account?{' '}
+          <a href="/login" style={{ color: '#38bdf8', textDecoration: 'none' }}>
+            Sign in here
           </a>
         </p>
       </div>
