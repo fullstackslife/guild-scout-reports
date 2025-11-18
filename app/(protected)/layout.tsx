@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
+import type { Database } from '@/lib/supabase/database.types';
 import { AppShell } from '@/components/app-shell';
 import { SupabaseProvider } from '@/components/providers/supabase-provider';
 import { createSupabaseServerComponentClient } from '@/lib/supabase/server';
@@ -18,12 +19,13 @@ export default async function ProtectedLayout({
     redirect('/login');
   }
 
-  const { data: profile } = await supabase
+  const { data: rawProfile } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', session.user.id)
     .single();
 
+  const profile = rawProfile as Database['public']['Tables']['profiles']['Row'] | null;
   if (!profile || !profile.active) {
     await supabase.auth.signOut();
     redirect('/login?reason=inactive');

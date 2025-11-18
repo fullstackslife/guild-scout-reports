@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import type { Database } from '@/lib/supabase/database.types';
 import { createSupabaseServerComponentClient } from '@/lib/supabase/server';
 import { UserManagementClient } from './user-management-client';
 
@@ -17,7 +18,7 @@ export default async function AdminUsersPage() {
     redirect('/login');
   }
 
-  const { data: profile, error: profileError } = await supabase
+  const { data: rawProfile, error: profileError } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', session.user.id)
@@ -28,6 +29,7 @@ export default async function AdminUsersPage() {
     redirect('/dashboard');
   }
 
+  const profile = rawProfile as Pick<Database['public']['Tables']['profiles']['Row'], 'role'> | null;
   if (profile?.role !== 'admin') {
     redirect('/dashboard');
   }

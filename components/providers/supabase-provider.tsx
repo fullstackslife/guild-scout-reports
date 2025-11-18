@@ -14,7 +14,8 @@ export function SupabaseProvider({
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
 
   return (
-    <SessionContextProvider supabaseClient={supabase} initialSession={session}>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    <SessionContextProvider supabaseClient={supabase as any} initialSession={session}>
       {children}
     </SessionContextProvider>
   );
