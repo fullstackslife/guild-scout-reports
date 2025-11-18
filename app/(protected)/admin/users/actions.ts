@@ -92,7 +92,7 @@ export async function createGuildUser(
     return { error: 'Service role configuration is missing.' };
   }
 
-  const { error } = await adminClient.auth.admin.createUser({
+  const { data: authData, error } = await adminClient.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
@@ -109,6 +109,29 @@ export async function createGuildUser(
   if (error) {
     console.error('Create user failed', error);
     return { error: error.message ?? 'Unable to create user.' };
+  }
+
+  if (!authData.user) {
+    return { error: 'User creation succeeded but no user data returned.' };
+  }
+
+  // Create profile record
+  const { error: profileError } = await adminClient
+    .from('profiles')
+    .insert({
+      id: authData.user.id,
+      email,
+      display_name: displayName,
+      username: username || null,
+      phone: phone || null,
+      role,
+      active
+    });
+
+  if (profileError) {
+    console.error('Profile creation failed', profileError);
+    // Don't fail the whole operation - user is created, profile might exist
+    // But log it for debugging
   }
 
   revalidatePath('/admin/users');
