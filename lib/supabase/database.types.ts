@@ -70,17 +70,17 @@ export interface Database {
           id: string;
           guild_id: string;
           user_id: string;
-          role: string;
+          role: GuildRole;
           joined_at: string;
         };
         Insert: {
           id?: string;
           guild_id: string;
           user_id: string;
-          role?: string;
+          role?: GuildRole;
         };
         Update: {
-          role?: string;
+          role?: GuildRole;
         };
         Relationships: [
           {
