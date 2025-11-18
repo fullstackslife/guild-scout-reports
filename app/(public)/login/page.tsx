@@ -38,7 +38,7 @@ export default async function LoginPage() {
         </p>
         <LoginForm />
         <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.9rem', textAlign: 'center' }}>
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <a href="/signup" style={{ color: '#38bdf8', textDecoration: 'none' }}>
             Create one here
           </a>

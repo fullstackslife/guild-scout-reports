@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
-import { useTransition } from 'react';
 import { useFormState } from 'react-dom';
 import { signupWithEmail, type SignupState } from './actions';
 
@@ -9,8 +7,6 @@ const initialState: SignupState = {};
 
 export function SignupForm() {
   const [state, formAction] = useFormState(signupWithEmail, initialState);
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
 
   return (
     <form
@@ -139,7 +135,7 @@ export function SignupForm() {
 
       <button
         type="submit"
-        disabled={isPending || state.success}
+        disabled={state.success}
         style={{
           padding: '0.75rem',
           borderRadius: '0.75rem',
@@ -147,11 +143,11 @@ export function SignupForm() {
           background: '#38bdf8',
           color: '#0f172a',
           fontWeight: 600,
-          cursor: isPending || state.success ? 'not-allowed' : 'pointer',
-          opacity: isPending || state.success ? 0.7 : 1
+          cursor: state.success ? 'not-allowed' : 'pointer',
+          opacity: state.success ? 0.7 : 1
         }}
       >
-        {isPending ? 'Creating account…' : 'Create account'}
+        {state.success ? 'Creating account…' : 'Create account'}
       </button>
     </form>
   );
