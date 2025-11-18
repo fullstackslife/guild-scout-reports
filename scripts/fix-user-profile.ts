@@ -99,10 +99,16 @@ async function fixUserProfile(email: string) {
       return;
     }
 
+    if (!newProfile) {
+      console.error('❌ Profile creation returned no data');
+      return;
+    }
+
+    const createdProfile = newProfile as Database['public']['Tables']['profiles']['Row'];
     console.log('✅ Profile created successfully!');
-    console.log(`   Display Name: ${newProfile.display_name}`);
-    console.log(`   Role: ${newProfile.role}`);
-    console.log(`   Active: ${newProfile.active}`);
+    console.log(`   Display Name: ${createdProfile.display_name}`);
+    console.log(`   Role: ${createdProfile.role}`);
+    console.log(`   Active: ${createdProfile.active}`);
   } else {
     console.log('\n✅ Profile exists:');
     console.log(`   Display Name: ${profile.display_name}`);
