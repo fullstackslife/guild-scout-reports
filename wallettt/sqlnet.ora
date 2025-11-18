@@ -1,0 +1,2 @@
+WALLET_LOCATION = (SOURCE = (METHOD = file) (METHOD_DATA = (DIRECTORY="C:\Users\Brian\OneDrive - Fullstacks.us\Desktop\guild-scout-reports\wallettt")))
+SSL_SERVER_DN_MATCH=yes
