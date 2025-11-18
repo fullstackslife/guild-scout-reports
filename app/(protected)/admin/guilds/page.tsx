@@ -64,8 +64,9 @@ export default async function AdminGuildsPage() {
   }
 
   // Get member counts for each guild
+  const guildsList = (guilds as GuildRow[] | null) ?? [];
   const guildsWithCounts = await Promise.all(
-    (guilds ?? []).map(async (guild) => {
+    guildsList.map(async (guild) => {
       const { count } = await supabase
         .from('guild_members')
         .select('*', { count: 'exact', head: true })

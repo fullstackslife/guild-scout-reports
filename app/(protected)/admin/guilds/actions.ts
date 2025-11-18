@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import type { Database } from '@/lib/supabase/database.types';
 import { createSupabaseServerActionClient } from '@/lib/supabase/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { generatePromoCode } from '@/lib/promo-code-utils';
 
 export type GuildActionState = {
   error?: string;
@@ -71,16 +72,43 @@ export async function createGuild(
     return { error: 'Invalid game selected.' };
   }
 
+  // Generate a unique promo code
+  let promoCode = generatePromoCode(game.name, name);
+  let attempts = 0;
+  const maxAttempts = 10;
+
+  // Ensure promo code is unique
+  while (attempts < maxAttempts) {
+    const { data: existing } = await admin
+      .from('guilds')
+      .select('id')
+      .eq('promo_code', promoCode)
+      .single();
+
+    if (!existing) {
+      break;
+    }
+
+    // Generate a new promo code if collision
+    promoCode = generatePromoCode(game.name, name);
+    attempts++;
+  }
+
+  if (attempts >= maxAttempts) {
+    return { error: 'Unable to generate unique promo code. Please try again.' };
+  }
+
   const guildInsert: Database['public']['Tables']['guilds']['Insert'] = {
     name,
     game: game.name,
     game_id: gameId,
-    description
+    description,
+    promo_code: promoCode
   };
 
   const { error: insertError } = await admin
     .from('guilds')
-    .insert(guildInsert as never);
+    .insert(guildInsert);
 
   if (insertError) {
     console.error('Guild creation failed', insertError);
@@ -88,7 +116,7 @@ export async function createGuild(
   }
 
   revalidatePath('/admin/guilds');
-  return { success: `Guild "${name}" created successfully.` };
+  return { success: `Guild "${name}" created successfully with promo code: ${promoCode}` };
 }
 
 export async function updateGuild(

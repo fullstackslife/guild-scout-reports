@@ -69,6 +69,33 @@ export function SignupForm() {
       </div>
 
       <div>
+        <label style={{ display: 'block', marginBottom: '0.4rem', color: '#cbd5f5' }} htmlFor="promo_code">
+          Guild Promo Code
+        </label>
+        <input
+          id="promo_code"
+          name="promo_code"
+          type="text"
+          required
+          placeholder="e.g., WOW_PHOEN_A3B9"
+          style={{
+            width: '100%',
+            padding: '0.75rem',
+            borderRadius: '0.75rem',
+            border: '1px solid rgba(148, 163, 184, 0.3)',
+            background: '#0f172a',
+            color: '#e2e8f0',
+            boxSizing: 'border-box',
+            fontFamily: 'monospace',
+            textTransform: 'uppercase'
+          }}
+        />
+        <p style={{ margin: '0.5rem 0 0', color: '#64748b', fontSize: '0.85rem' }}>
+          Enter the promo code provided by your guild admin
+        </p>
+      </div>
+
+      <div>
         <label style={{ display: 'block', marginBottom: '0.4rem', color: '#cbd5f5' }} htmlFor="password">
           Password
         </label>

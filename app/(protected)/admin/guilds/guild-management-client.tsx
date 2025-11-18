@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useActionState, useTransition } from 'react';
+import React, { useActionState } from 'react';
 import {
   createGuild,
   updateGuild,
@@ -13,6 +13,7 @@ type Guild = {
   game: string;
   game_id: string | null;
   description: string | null;
+  promo_code: string | null;
   created_at: string;
   updated_at: string;
   memberCount: number;
@@ -63,7 +64,6 @@ const deleteButtonStyle: React.CSSProperties = {
 
 export function GuildManagementClient({ guilds, games }: GuildManagementClientProps) {
   const [createState, createAction, createPending] = useActionState(createGuild, {});
-  const [isPending, startTransition] = useTransition();
 
   return (
     <div style={{ display: 'grid', gap: '2rem' }}>
@@ -320,6 +320,24 @@ function GuildItem({
           </div>
           {guild.description && (
             <p style={{ margin: '0.5rem 0 0', color: '#94a3b8', fontSize: '0.9rem' }}>{guild.description}</p>
+          )}
+          {guild.promo_code && (
+            <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ color: '#94a3b8', fontSize: '0.875rem' }}>Promo Code:</span>
+              <code
+                style={{
+                  padding: '0.25rem 0.5rem',
+                  borderRadius: '0.375rem',
+                  background: '#1e293b',
+                  color: '#38bdf8',
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  fontFamily: 'monospace'
+                }}
+              >
+                {guild.promo_code}
+              </code>
+            </div>
           )}
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>

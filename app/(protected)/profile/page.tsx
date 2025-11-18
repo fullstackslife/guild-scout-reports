@@ -12,7 +12,6 @@ export const metadata: Metadata = {
 type ProfileRow = Database['public']['Tables']['profiles']['Row'];
 type GuildRow = Database['public']['Tables']['guilds']['Row'];
 type GuildMemberRow = Database['public']['Tables']['guild_members']['Row'];
-type GameRow = Database['public']['Tables']['games']['Row'];
 
 export default async function ProfilePage() {
   const supabase = createSupabaseServerComponentClient();
@@ -61,8 +60,9 @@ export default async function ProfilePage() {
     if (guildsError) {
       console.error('Failed to load guilds', guildsError);
     } else if (guilds) {
+      const guildsList = guilds as GuildRow[];
       for (const membership of memberships) {
-        const guild = guilds.find(g => g.id === membership.guild_id);
+        const guild = guildsList.find(g => g.id === membership.guild_id);
         if (guild) {
           guildDetails.push({
             ...guild,

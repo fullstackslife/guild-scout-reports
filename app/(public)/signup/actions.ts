@@ -17,9 +17,10 @@ export async function signupWithEmail(
   const displayName = (formData.get('display_name') as string | null)?.trim() ?? '';
   const password = (formData.get('password') as string | null) ?? '';
   const passwordConfirm = (formData.get('password_confirm') as string | null) ?? '';
+  const promoCode = (formData.get('promo_code') as string | null)?.trim().toUpperCase() ?? '';
 
   // Validation
-  if (!email || !displayName || !password || !passwordConfirm) {
+  if (!email || !displayName || !password || !passwordConfirm || !promoCode) {
     return { error: 'All fields are required.' };
   }
 
@@ -37,6 +38,17 @@ export async function signupWithEmail(
 
   const supabase = createSupabaseServerActionClient();
   const adminClient = createSupabaseAdminClient();
+
+  // Validate promo code and get guild
+  const { data: guild, error: guildError } = await adminClient
+    .from('guilds')
+    .select('id, name')
+    .eq('promo_code', promoCode)
+    .single();
+
+  if (guildError || !guild) {
+    return { error: 'Invalid promo code. Please check with your guild admin.' };
+  }
 
   // Sign up the user
   let userId: string | undefined;
@@ -81,24 +93,12 @@ export async function signupWithEmail(
       // Continue anyway - user is created, profile might exist or might need manual creation
     }
 
-    // Add user to default guild
+    // Add user to the guild based on promo code
     try {
-      // Get the default guild
-      const { data: defaultGuild } = await adminClient
-        .from('guilds')
-        .select('id')
-        .eq('name', 'Default Guild')
-        .single();
-
-      if (!defaultGuild) {
-        console.error('Default Guild not found - user will have no guild membership');
-        return { error: 'System configuration error. Please contact support.' };
-      }
-
       const { error: guildMemberError } = await adminClient
         .from('guild_members')
         .insert({
-          guild_id: defaultGuild.id,
+          guild_id: guild.id,
           user_id: userId,
           role: 'member'
         });
@@ -119,6 +119,6 @@ export async function signupWithEmail(
   // Return a message asking user to check email for confirmation
   return {
     success: true,
-    message: `Account created! Please check your email at ${email} for a confirmation link to complete your signup.`
+    message: `Account created for guild "${guild.name}"! Please check your email at ${email} for a confirmation link to complete your signup.`
   };
 }

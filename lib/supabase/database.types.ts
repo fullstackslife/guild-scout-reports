@@ -43,12 +43,36 @@ export interface Database {
           }
         ];
       };
+      games: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          icon: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          icon?: string | null;
+        };
+        Update: {
+          name?: string;
+          description?: string | null;
+          icon?: string | null;
+        };
+        Relationships: [];
+      };
       guilds: {
         Row: {
           id: string;
           name: string;
           game: string;
+          game_id: string | null;
           description: string | null;
+          promo_code: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -56,14 +80,25 @@ export interface Database {
           id?: string;
           name: string;
           game: string;
+          game_id?: string | null;
           description?: string | null;
+          promo_code?: string | null;
         };
         Update: {
           name?: string;
           game?: string;
+          game_id?: string | null;
           description?: string | null;
+          promo_code?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'guilds_game_id_fkey';
+            columns: ['game_id'];
+            referencedRelation: 'games';
+            referencedColumns: ['id'];
+          }
+        ];
       };
       guild_members: {
         Row: {
