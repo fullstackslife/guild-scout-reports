@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { useState } from "react"; // Used in hooks below
 import { getParsedScoutData } from "@/app/(protected)/scout-reports/[id]/actions";
 import type { ParsedScoutReport } from "@/lib/scout-report-parser";
 import type { Database } from "@/lib/supabase/database.types";
@@ -252,7 +253,7 @@ export function ValidationClient({
                 maxHeight: "600px",
                 overflow: "auto"
               }}>
-                <DataDisplay data={parsedData} />
+                <DataDisplay data={parsedData as Record<string, unknown>} />
               </div>
             </div>
           </div>

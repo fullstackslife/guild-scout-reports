@@ -107,8 +107,11 @@ export default async function ValidationPage({
       .eq("screenshot_id", screenshotId)
       .maybeSingle();
 
-    if (report) {
-      redirect(`/scout-reports/validation?report_id=${report.id}`);
+    type ReportRow = { id: string };
+    const typedReport = report as ReportRow | null;
+
+    if (typedReport) {
+      redirect(`/scout-reports/validation?report_id=${typedReport.id}`);
     } else {
       return (
         <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem" }}>
