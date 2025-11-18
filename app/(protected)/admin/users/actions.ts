@@ -13,7 +13,7 @@ export type UserActionState = {
 
 type AdminProfile = Pick<Database['public']['Tables']['profiles']['Row'], 'role' | 'active'>;
 
-async function ensureAdmin(): Promise<{ ok: true } | { error: string }> {
+async function ensureAdmin(): Promise<{ ok: true; userId: string } | { error: string }> {
   const supabase = createSupabaseServerActionClient();
   const {
     data: { session }
@@ -39,7 +39,7 @@ async function ensureAdmin(): Promise<{ ok: true } | { error: string }> {
     return { error: 'Admin permissions are required.' };
   }
 
-  return { ok: true };
+  return { ok: true, userId: session.user.id };
 }
 
 function coerceRole(value: FormDataEntryValue | null): Role {

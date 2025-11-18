@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
+import type { Database } from '@/lib/supabase/database.types';
 import { createSupabaseServerComponentClient } from '@/lib/supabase/server';
 
 export default async function AdminLayout({
@@ -16,7 +17,7 @@ export default async function AdminLayout({
     redirect('/login');
   }
 
-  const { data: profile, error } = await supabase
+  const { data: rawProfile, error } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', session.user.id)
@@ -26,6 +27,8 @@ export default async function AdminLayout({
     console.error('Failed to load admin profile', error);
     redirect('/dashboard');
   }
+
+  const profile = rawProfile as Pick<Database['public']['Tables']['profiles']['Row'], 'role'> | null;
 
   if (profile?.role !== 'admin') {
     redirect('/dashboard');
