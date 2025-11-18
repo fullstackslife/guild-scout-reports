@@ -80,6 +80,34 @@ export async function signupWithEmail(
       console.error('Profile insert error:', error);
       // Continue anyway - user is created, profile might exist or might need manual creation
     }
+
+    // Add user to default guild
+    try {
+      // Get the default guild
+      const { data: defaultGuild } = await adminClient
+        .from('guilds')
+        .select('id')
+        .eq('name', 'Default Guild')
+        .single();
+
+      if (defaultGuild) {
+        const { error: guildMemberError } = await adminClient
+          .from('guild_members')
+          .insert({
+            guild_id: defaultGuild.id,
+            user_id: userId,
+            role: 'member'
+          });
+
+        if (guildMemberError) {
+          console.error('Guild member creation error:', guildMemberError);
+          // Continue anyway - user is created, guild membership might already exist
+        }
+      }
+    } catch (error) {
+      console.error('Guild member insert error:', error);
+      // Continue anyway - user is created
+    }
   } catch (error) {
     console.error('Signup error:', error);
     return { error: 'Unable to create account right now.' };

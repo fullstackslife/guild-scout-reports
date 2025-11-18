@@ -28,13 +28,14 @@ export async function extractTextFromScreenshot(
     }
 
     // Dynamic import to handle optional dependency
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let client: any;
     try {
       const { Anthropic } = await import("@anthropic-ai/sdk");
       client = new Anthropic({
         apiKey: process.env.ANTHROPIC_API_KEY
       });
-    } catch (importError) {
+    } catch {
       console.warn("@anthropic-ai/sdk not available - skipping text extraction");
       return {
         success: false,
@@ -43,6 +44,7 @@ export async function extractTextFromScreenshot(
     }
 
     // Call Claude Vision API
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     const message = await client.messages.create({
       model: "claude-3-5-sonnet-20241022",
       max_tokens: 2048,
@@ -77,8 +79,9 @@ If the image contains no readable text, respond with "No text found in image".`
 
     // Extract text content from response
     const textContent = message.content.find(
-      (block: any) => block.type === "text"
-    );
+      (block: { type: string }) => block.type === "text"
+    ) as { type: string; text: string } | undefined;
+    
     if (!textContent || textContent.type !== "text") {
       return {
         success: false,
@@ -91,11 +94,12 @@ If the image contains no readable text, respond with "No text found in image".`
     // Update database with extracted text
     const supabase = createSupabaseServerActionClient();
 
-    const { error: updateError } = await (supabase.from("screenshots") as any)
+    const { error: updateError } = await supabase
+      .from("screenshots")
       .update({
         extracted_text: extractedText,
-        processing_status: "completed"
-      })
+        processing_status: "completed" as const
+      } as never)
       .eq("id", request.screenshotId);
 
     if (updateError) {
@@ -117,10 +121,11 @@ If the image contains no readable text, respond with "No text found in image".`
     // Mark as failed in database
     const supabase = createSupabaseServerActionClient();
     try {
-      await (supabase.from("screenshots") as any)
+      await supabase
+        .from("screenshots")
         .update({
-          processing_status: "failed"
-        })
+          processing_status: "failed" as const
+        } as never)
         .eq("id", request.screenshotId);
     } catch (dbError) {
       console.error("Failed to update processing status:", dbError);

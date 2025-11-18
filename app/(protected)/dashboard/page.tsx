@@ -8,6 +8,8 @@ import { createSupabaseServerComponentClient } from '@/lib/supabase/server';
 export const dynamic = 'force-dynamic';
 
 type ScreenshotRow = Database['public']['Tables']['screenshots']['Row'];
+type GuildRow = Database['public']['Tables']['guilds']['Row'];
+type GuildMemberRow = Pick<Database['public']['Tables']['guild_members']['Row'], 'guild_id'>;
 type ScreenshotWithUrl = ScreenshotRow & { signedUrl: string | null };
 
 export default async function DashboardPage() {
@@ -20,9 +22,29 @@ export default async function DashboardPage() {
     return null;
   }
 
+  // Get user's guilds
+  const { data: guildMemberships } = await supabase
+    .from('guild_members')
+    .select('guild_id')
+    .eq('user_id', session.user.id);
+
+  const typedGuildMemberships = (guildMemberships as GuildMemberRow[] | null);
+  const userGuildIds = typedGuildMemberships?.map(gm => gm.guild_id) ?? [];
+
+  // Fetch guild information
+  let currentGuild: GuildRow | null = null;
+  if (userGuildIds.length > 0) {
+    const { data: guildData } = await supabase
+      .from('guilds')
+      .select('*')
+      .eq('id', userGuildIds[0])
+      .single();
+    currentGuild = (guildData as GuildRow | null);
+  }
+
   const { data: screenshots } = await supabase
     .from('screenshots')
-    .select('id, file_path, label, created_at')
+    .select('id, file_path, label, created_at, guild_id')
     .eq('user_id', session.user.id)
     .order('created_at', { ascending: false });
 
@@ -43,6 +65,30 @@ export default async function DashboardPage() {
 
   return (
     <div style={{ display: 'grid', gap: '2rem' }}>
+      {currentGuild && (
+        <section style={{ 
+          padding: '1rem', 
+          borderRadius: '0.75rem', 
+          background: '#111827',
+          border: '1px solid rgba(148, 163, 184, 0.2)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ 
+              padding: '0.5rem 1rem', 
+              borderRadius: '0.5rem', 
+              background: '#38bdf8',
+              color: '#0f172a',
+              fontWeight: 600,
+              fontSize: '0.875rem'
+            }}>
+              {currentGuild.game}
+            </div>
+            <span style={{ color: '#94a3b8' }}>•</span>
+            <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{currentGuild.name}</span>
+          </div>
+        </section>
+      )}
+
       <section style={{ display: 'grid', gap: '1rem' }}>
         <h2 style={{ margin: 0 }}>Upload a new screenshot</h2>
         <UploadScreenshotForm />

@@ -7,6 +7,10 @@ import { createSupabaseServerComponentClient } from '@/lib/supabase/server';
 export const dynamic = 'force-dynamic';
 
 type ScreenshotRow = Database['public']['Tables']['screenshots']['Row'];
+type ProfileRow = Database['public']['Tables']['profiles']['Row'];
+type GuildRow = Database['public']['Tables']['guilds']['Row'];
+type GuildMemberRow = Pick<Database['public']['Tables']['guild_members']['Row'], 'guild_id'>;
+
 type ScreenshotWithMeta = ScreenshotRow & {
   signedUrl: string | null;
   uploaderName: string | null;
@@ -29,17 +33,38 @@ export default async function GalleryPage() {
     return null;
   }
 
-  // Fetch all screenshots
+  // Get user's guilds
+  const { data: guildMemberships } = await supabase
+    .from('guild_members')
+    .select('guild_id')
+    .eq('user_id', session.user.id);
+
+  const typedGuildMemberships = (guildMemberships as GuildMemberRow[] | null);
+  const userGuildIds = typedGuildMemberships?.map(gm => gm.guild_id) ?? [];
+
+  // Fetch guild information
+  let currentGuild: GuildRow | null = null;
+  if (userGuildIds.length > 0) {
+    const { data: guildData } = await supabase
+      .from('guilds')
+      .select('*')
+      .eq('id', userGuildIds[0])
+      .single();
+    currentGuild = (guildData as GuildRow | null);
+  }
+
+  // Fetch screenshots from user's guild(s)
   const { data: screenshots, error: screenshotError } = await supabase
     .from('screenshots')
-    .select('id, file_path, label, extracted_text, processing_status, created_at, user_id')
+    .select('id, file_path, label, extracted_text, processing_status, created_at, user_id, guild_id')
+    .in('guild_id', userGuildIds.length > 0 ? userGuildIds : [''])
     .order('created_at', { ascending: false });
 
   if (screenshotError) {
     console.error('Gallery query error:', screenshotError);
   }
 
-  // Fetch all profiles
+  // Fetch all profiles for users in the guild
   const { data: profiles, error: profileError } = await supabase
     .from('profiles')
     .select('id, display_name');
@@ -48,7 +73,7 @@ export default async function GalleryPage() {
     console.error('Profile query error:', profileError);
   }
 
-  const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p.display_name]));
+  const profileMap = new Map((profiles ?? []).map((p: ProfileRow) => [p.id, p.display_name]));
 
   const screenshotList = (screenshots ?? []) as ScreenshotRow[];
 
@@ -93,9 +118,14 @@ export default async function GalleryPage() {
     <div style={{ display: 'grid', gap: '3rem' }}>
       <section style={{ display: 'grid', gap: '1rem' }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: '2rem' }}>Guild Gallery</h1>
+          <h1 style={{ margin: 0, fontSize: '2rem' }}>
+            {currentGuild ? `${currentGuild.name} Gallery` : 'Guild Gallery'}
+          </h1>
           <p style={{ margin: '0.5rem 0 0', color: '#94a3b8' }}>
-            Browse all scout reports shared by guild members
+            {currentGuild 
+              ? `Browse scout reports for ${currentGuild.game}`
+              : 'Browse all scout reports shared by guild members'
+            }
           </p>
         </div>
         <div

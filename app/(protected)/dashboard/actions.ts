@@ -15,6 +15,7 @@ export type UploadState = {
 
 type ScreenshotInsert = Database['public']['Tables']['screenshots']['Insert'];
 type ProfileRole = Pick<Database['public']['Tables']['profiles']['Row'], 'role'>;
+type GuildMemberRow = Pick<Database['public']['Tables']['guild_members']['Row'], 'guild_id'>;
 
 export async function uploadScreenshot(_prev: UploadState, formData: FormData): Promise<UploadState> {
   const supabase = createSupabaseServerActionClient();
@@ -38,6 +39,18 @@ export async function uploadScreenshot(_prev: UploadState, formData: FormData): 
     return { error: 'Only image uploads are supported right now.' };
   }
 
+  // Get user's primary guild
+  const { data: guildMemberships } = await supabase
+    .from('guild_members')
+    .select('guild_id')
+    .eq('user_id', session.user.id)
+    .limit(1);
+
+  const typedGuildMemberships = guildMemberships as GuildMemberRow[] | null;
+  const guildId = typedGuildMemberships && typedGuildMemberships.length > 0 
+    ? typedGuildMemberships[0].guild_id 
+    : null;
+
   const extension = file.name.split('.').pop()?.toLowerCase() ?? 'png';
   const filePath = `${session.user.id}/${randomUUID()}.${extension}`;
 
@@ -58,14 +71,16 @@ export async function uploadScreenshot(_prev: UploadState, formData: FormData): 
 
     const record: ScreenshotInsert = {
       user_id: session.user.id,
+      guild_id: guildId,
       file_path: filePath,
       label,
       processing_status: 'pending'
     };
 
+    // Type assertion needed due to Supabase client type resolution
     const insertResult = await supabase
       .from('screenshots')
-      .insert([record])
+      .insert(record as never)
       .select();
 
     if (insertResult.error) {
@@ -75,7 +90,8 @@ export async function uploadScreenshot(_prev: UploadState, formData: FormData): 
     }
 
     // Get the inserted record ID
-    const insertedRecord = insertResult.data?.[0];
+    type ScreenshotRow = Database['public']['Tables']['screenshots']['Row'];
+    const insertedRecord = (insertResult.data?.[0] as ScreenshotRow | undefined);
     if (insertedRecord?.id) {
       // Trigger OCR processing in the background
       const signedUrl = await supabase.storage

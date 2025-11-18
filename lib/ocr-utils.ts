@@ -53,11 +53,14 @@ export async function retryOCRForScreenshot(screenshotId: string): Promise<{
       };
     }
 
+    // Type assertion for screenshot
+    const typedScreenshot = screenshot as { id: string; file_path: string };
+
     // Generate signed URL
     const { SCREENSHOTS_BUCKET } = await import("@/lib/constants");
     const { data: signedUrlData } = await supabase.storage
       .from(SCREENSHOTS_BUCKET)
-      .createSignedUrl((screenshot as any).file_path, 60 * 60);
+      .createSignedUrl(typedScreenshot.file_path, 60 * 60);
 
     if (!signedUrlData?.signedUrl) {
       return {
