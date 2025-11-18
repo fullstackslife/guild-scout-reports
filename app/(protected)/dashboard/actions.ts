@@ -78,9 +78,10 @@ export async function uploadScreenshot(_prev: UploadState, formData: FormData): 
     };
 
     // Type assertion needed due to Supabase client type resolution
+    const validatedRecord: Database['public']['Tables']['screenshots']['Insert'] = record;
     const insertResult = await supabase
       .from('screenshots')
-      .insert(record satisfies Database['public']['Tables']['screenshots']['Insert'])
+      .insert(validatedRecord as never)
       .select();
 
     if (insertResult.error) {
