@@ -12,6 +12,9 @@ export type UploadState = {
   success?: string;
 };
 
+type ScreenshotInsert = Database['public']['Tables']['screenshots']['Insert'];
+type ProfileRole = Pick<Database['public']['Tables']['profiles']['Row'], 'role'>;
+
 export async function uploadScreenshot(_prev: UploadState, formData: FormData): Promise<UploadState> {
   const supabase = createSupabaseServerActionClient();
   const {
@@ -52,11 +55,17 @@ export async function uploadScreenshot(_prev: UploadState, formData: FormData): 
       return { error: 'Unable to upload file. Please try again.' };
     }
 
-    const { error: insertError } = await supabase.from('screenshots').insert({
+    const record: ScreenshotInsert = {
       user_id: session.user.id,
       file_path: filePath,
       label
-    });
+    };
+
+    const { error: insertError } = await (supabase as unknown as {
+      from: (table: string) => {
+        insert: (values: ScreenshotInsert) => Promise<{ error: { message: string } | null }>;
+      };
+    }).from('screenshots').insert(record);
 
     if (insertError) {
       console.error('Metadata insert failed', insertError);
@@ -90,7 +99,7 @@ export async function deleteScreenshot(formData: FormData): Promise<{ error?: st
     return { error: 'Not authenticated.' };
   }
 
-  const { data: profile, error: profileError } = await supabase
+  const { data: rawProfile, error: profileError } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', session.user.id)
@@ -101,6 +110,7 @@ export async function deleteScreenshot(formData: FormData): Promise<{ error?: st
     return { error: 'Unable to verify permissions.' };
   }
 
+  const profile = rawProfile as ProfileRole | null;
   const isAdmin = profile?.role === 'admin';
 
   if (isAdmin) {

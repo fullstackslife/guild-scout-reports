@@ -1,7 +1,11 @@
 import { formatDistanceToNow } from 'date-fns';
 import { UploadScreenshotForm } from '@/components/forms/upload-screenshot-form';
 import { SCREENSHOTS_BUCKET } from '@/lib/constants';
+import type { Database } from '@/lib/supabase/database.types';
 import { createSupabaseServerComponentClient } from '@/lib/supabase/server';
+
+type ScreenshotRow = Database['public']['Tables']['screenshots']['Row'];
+type ScreenshotWithUrl = ScreenshotRow & { signedUrl: string | null };
 
 export default async function DashboardPage() {
   const supabase = createSupabaseServerComponentClient();
@@ -13,14 +17,16 @@ export default async function DashboardPage() {
     return null;
   }
 
-  const { data: screenshots = [] } = await supabase
+  const { data: screenshots } = await supabase
     .from('screenshots')
     .select('id, file_path, label, created_at')
     .eq('user_id', session.user.id)
     .order('created_at', { ascending: false });
 
-  const signedUrls = await Promise.all(
-    screenshots.map(async (shot) => {
+  const screenshotList: ScreenshotRow[] = screenshots ?? [];
+
+  const signedUrls: ScreenshotWithUrl[] = await Promise.all(
+    screenshotList.map(async (shot) => {
       const { data } = await supabase.storage
         .from(SCREENSHOTS_BUCKET)
         .createSignedUrl(shot.file_path, 60 * 60);
@@ -28,7 +34,7 @@ export default async function DashboardPage() {
       return {
         ...shot,
         signedUrl: data?.signedUrl ?? null
-      };
+      } satisfies ScreenshotWithUrl;
     })
   );
 
