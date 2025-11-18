@@ -159,7 +159,12 @@ export default async function ValidationPage({
 
       {reports && reports.length > 0 ? (
         <div style={{ display: "grid", gap: "1rem" }}>
-          {reports.map((report: any) => (
+          {reports.map((report: {
+            id: string;
+            created_at: string;
+            target_name: string | null;
+            screenshots: { label: string | null } | null;
+          }) => (
             <a
               key={report.id}
               href={`/scout-reports/validation?report_id=${report.id}`}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { useFormState } from "react-dom";
 import { useRouter } from "next/navigation";
 import { createScoutReport, type ScoutReportActionState } from "@/app/(protected)/scout-reports/[id]/actions";
