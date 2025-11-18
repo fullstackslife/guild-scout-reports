@@ -113,8 +113,8 @@ using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
 -- Create a default guild for existing users (migration compatibility)
 insert into public.guilds (name, game, description)
-values ('Default Guild', 'General', 'Default guild for all users')
-on conflict do nothing;
+select 'Default Guild', 'General', 'Default guild for all users'
+where not exists (select 1 from public.guilds where name = 'Default Guild');
 
 -- Get the default guild id and assign all existing users to it
 do $$
