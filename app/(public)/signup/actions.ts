@@ -90,19 +90,22 @@ export async function signupWithEmail(
         .eq('name', 'Default Guild')
         .single();
 
-      if (defaultGuild) {
-        const { error: guildMemberError } = await adminClient
-          .from('guild_members')
-          .insert({
-            guild_id: defaultGuild.id,
-            user_id: userId,
-            role: 'member'
-          });
+      if (!defaultGuild) {
+        console.error('Default Guild not found - user will have no guild membership');
+        return { error: 'System configuration error. Please contact support.' };
+      }
 
-        if (guildMemberError) {
-          console.error('Guild member creation error:', guildMemberError);
-          // Continue anyway - user is created, guild membership might already exist
-        }
+      const { error: guildMemberError } = await adminClient
+        .from('guild_members')
+        .insert({
+          guild_id: defaultGuild.id,
+          user_id: userId,
+          role: 'member'
+        });
+
+      if (guildMemberError) {
+        console.error('Guild member creation error:', guildMemberError);
+        // Continue anyway - user is created, guild membership might already exist
       }
     } catch (error) {
       console.error('Guild member insert error:', error);
