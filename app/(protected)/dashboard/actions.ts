@@ -6,6 +6,7 @@ import type { Database } from '@/lib/supabase/database.types';
 import { SCREENSHOTS_BUCKET } from '@/lib/constants';
 import { createSupabaseServerActionClient } from '@/lib/supabase/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { triggerOCRProcessing } from '@/lib/ocr-utils';
 
 export type UploadState = {
   error?: string;
@@ -58,19 +59,36 @@ export async function uploadScreenshot(_prev: UploadState, formData: FormData): 
     const record: ScreenshotInsert = {
       user_id: session.user.id,
       file_path: filePath,
-      label
+      label,
+      processing_status: 'pending'
     };
 
-    const { error: insertError } = await (supabase as unknown as {
-      from: (table: string) => {
-        insert: (values: ScreenshotInsert) => Promise<{ error: { message: string } | null }>;
-      };
-    }).from('screenshots').insert(record);
+    const insertResult = await supabase
+      .from('screenshots')
+      .insert([record])
+      .select();
 
-    if (insertError) {
-      console.error('Metadata insert failed', insertError);
+    if (insertResult.error) {
+      console.error('Metadata insert failed', insertResult.error);
       await supabase.storage.from(SCREENSHOTS_BUCKET).remove([filePath]);
       return { error: 'Unable to save screenshot. Please try again.' };
+    }
+
+    // Get the inserted record ID
+    const insertedRecord = insertResult.data?.[0];
+    if (insertedRecord?.id) {
+      // Trigger OCR processing in the background
+      const signedUrl = await supabase.storage
+        .from(SCREENSHOTS_BUCKET)
+        .createSignedUrl(filePath, 60 * 60)
+        .then(result => result.data?.signedUrl);
+
+      if (signedUrl) {
+        triggerOCRProcessing(insertedRecord.id, signedUrl).catch(error => {
+          console.error('Failed to trigger OCR:', error);
+          // Don't fail the upload if OCR fails
+        });
+      }
     }
   } catch (error) {
     console.error('Upload failure', error);

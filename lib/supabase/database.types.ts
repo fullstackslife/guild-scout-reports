@@ -1,4 +1,5 @@
 export type Role = 'admin' | 'member';
+export type ProcessingStatus = 'pending' | 'completed' | 'failed';
 
 export interface Database {
   public: {
@@ -47,6 +48,9 @@ export interface Database {
           user_id: string;
           file_path: string;
           label: string | null;
+          extracted_text: string | null;
+          processing_status: ProcessingStatus;
+          processed_at: string | null;
           created_at: string;
         };
         Insert: {
@@ -54,9 +58,15 @@ export interface Database {
           user_id: string;
           file_path: string;
           label?: string | null;
+          extracted_text?: string | null;
+          processing_status?: ProcessingStatus;
+          processed_at?: string | null;
         };
         Update: {
           label?: string | null;
+          extracted_text?: string | null;
+          processing_status?: ProcessingStatus;
+          processed_at?: string | null;
         };
         Relationships: [
           {
