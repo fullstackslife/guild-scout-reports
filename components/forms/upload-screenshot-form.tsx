@@ -28,7 +28,7 @@ function SubmitButton() {
   );
 }
 
-export function UploadScreenshotForm() {
+export function UploadScreenshotForm({ defaultGuildId }: { defaultGuildId?: string | null }) {
   const [state, formAction] = useFormState(uploadScreenshot, initialState);
   const formRef = useRef<HTMLFormElement | null>(null);
 
@@ -51,6 +51,7 @@ export function UploadScreenshotForm() {
         background: '#111827'
       }}
     >
+      {defaultGuildId && <input type="hidden" name="guild_id" value={defaultGuildId} />}
       <div style={{ display: 'grid', gap: '0.5rem' }}>
         <label htmlFor="file" style={{ fontWeight: 600, color: '#cbd5f5' }}>
           Screenshot file

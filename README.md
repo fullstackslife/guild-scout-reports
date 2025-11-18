@@ -118,10 +118,17 @@ NEXTAUTH_SECRET=generate_with_openssl_rand_hex_32
 
 4. **Set up the database**
 
+Apply database migrations to Supabase:
+
 ```bash
-# The migrations will be applied automatically when you run the app
-# Or manually via Supabase dashboard → SQL Editor
+# Check which migrations need to be applied
+npm run migrate:check
+
+# Apply migrations via Supabase Dashboard SQL Editor, or
+# Ask the AI assistant to apply them using MCP Supabase tools
 ```
+
+See [MIGRATION_SYNC.md](./MIGRATION_SYNC.md) for detailed migration sync instructions.
 
 5. **Run the development server**
 
@@ -322,10 +329,14 @@ Response:
 ### Database Migrations
 
 1. Create SQL file in `supabase/migrations/`
-2. Name: `NNNN_description.sql`
+2. Name: `NNNN_description.sql` (sequential numbering)
 3. Make migrations idempotent with `IF NOT EXISTS`
 4. Test locally before deploying
-5. Run migration and verify in Supabase dashboard
+5. Check status: `npm run migrate:check`
+6. Apply migration via Supabase Dashboard or MCP tools
+7. Verify in Supabase dashboard
+
+**Important**: Always apply migrations to Supabase before deploying code. See [MIGRATION_SYNC.md](./MIGRATION_SYNC.md) for keeping migrations in sync.
 
 ### Styling
 

@@ -49,6 +49,10 @@ export interface Database {
           name: string;
           description: string | null;
           icon: string | null;
+          screenshot_types: string | null;
+          usage_guide: string | null;
+          display_order: number;
+          coming_soon: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -57,11 +61,19 @@ export interface Database {
           name: string;
           description?: string | null;
           icon?: string | null;
+          screenshot_types?: string | null;
+          usage_guide?: string | null;
+          display_order?: number;
+          coming_soon?: boolean;
         };
         Update: {
           name?: string;
           description?: string | null;
           icon?: string | null;
+          screenshot_types?: string | null;
+          usage_guide?: string | null;
+          display_order?: number;
+          coming_soon?: boolean;
         };
         Relationships: [];
       };
@@ -72,6 +84,7 @@ export interface Database {
           game: string;
           game_id: string | null;
           description: string | null;
+          announcement: string | null;
           promo_code: string | null;
           created_at: string;
           updated_at: string;
@@ -82,6 +95,7 @@ export interface Database {
           game: string;
           game_id?: string | null;
           description?: string | null;
+          announcement?: string | null;
           promo_code?: string | null;
         };
         Update: {
@@ -89,6 +103,7 @@ export interface Database {
           game?: string;
           game_id?: string | null;
           description?: string | null;
+          announcement?: string | null;
           promo_code?: string | null;
         };
         Relationships: [

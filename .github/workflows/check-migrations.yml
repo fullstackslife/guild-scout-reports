@@ -1,0 +1,38 @@
+name: Check Migration Status
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/**'
+      - 'scripts/check-migrations.js'
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/**'
+
+jobs:
+  check-migrations:
+    runs-on: ubuntu-latest
+    name: Verify Migration Files
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Check migration files
+        run: npm run migrate:check
+      
+      - name: List migrations
+        run: npm run migrate:list
+      
+      - name: Migration reminder
+        run: |
+          echo "::notice::Remember to apply any new migrations to Supabase before merging this PR"
+          echo "::notice::Use 'npm run migrate:check' locally or ask the AI assistant to apply migrations"
+

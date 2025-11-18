@@ -14,6 +14,7 @@ interface AppShellProps {
 const navItems = [
   { href: '/dashboard', label: 'My Screenshots' },
   { href: '/gallery', label: 'Guild Gallery' },
+  { href: '/games', label: 'Games' },
   { href: '/profile', label: 'Profile' }
 ];
 
@@ -78,6 +79,15 @@ export function AppShell({ profile, children }: AppShellProps) {
                 }}
               >
                 Guilds
+              </Link>
+              <Link
+                href="/admin/games"
+                style={{
+                  color: pathname?.startsWith('/admin/games') ? '#38bdf8' : '#cbd5f5',
+                  fontWeight: pathname?.startsWith('/admin/games') ? 600 : 400
+                }}
+              >
+                Games
               </Link>
             </>
           ) : null}

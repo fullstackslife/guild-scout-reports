@@ -7,6 +7,7 @@ import {
   updateGuild,
   deleteGuild
 } from './actions';
+import { InfoSection } from '@/components/info-section';
 
 type Guild = {
   id: string;
@@ -14,6 +15,7 @@ type Guild = {
   game: string;
   game_id: string | null;
   description: string | null;
+  announcement: string | null;
   promo_code: string | null;
   created_at: string;
   updated_at: string;
@@ -81,6 +83,44 @@ export function GuildManagementClient({ guilds, games }: GuildManagementClientPr
           Create and manage guilds for different games. Assign users to guilds from the Users page.
         </p>
       </section>
+
+      {/* Guild Management Guide */}
+      <InfoSection
+        title="Guild Management Guide"
+        icon="⚙️"
+        items={[
+          {
+            icon: '➕',
+            title: 'Creating Guilds',
+            description:
+              'Create new guilds by selecting a game and providing a name. Each guild gets a unique promo code that can be used during user signup. Guilds are organized by game for better organization.'
+          },
+          {
+            icon: '📢',
+            title: 'Guild Announcements',
+            description:
+              'Post announcements and welcome messages that will be visible to all guild members in the Gallery. Use this to share important information, strategies, or updates with your guild.'
+          },
+          {
+            icon: '👥',
+            title: 'Member Management',
+            description:
+              'Add users to guilds from the Users management page. Each user can belong to multiple guilds with different roles (member, admin, or owner). Guild admins can manage announcements.'
+          },
+          {
+            icon: '🔑',
+            title: 'Promo Codes',
+            description:
+              'Each guild automatically receives a unique promo code. Users can enter this code during signup to automatically join the guild. Promo codes are displayed in the guild details.'
+          },
+          {
+            icon: '🗑️',
+            title: 'Deleting Guilds',
+            description:
+              'Deleting a guild will remove all associated screenshots and memberships. This action cannot be undone, so use caution when deleting guilds.'
+          }
+        ]}
+      />
 
       {/* Create New Guild */}
       <section
@@ -285,6 +325,25 @@ function GuildItem({
               defaultValue={guild.description ?? ''}
               style={inputStyle}
             />
+          </div>
+          <div>
+            <label
+              htmlFor={`announcement-${guild.id}`}
+              style={{ display: 'block', marginBottom: '0.4rem', color: '#cbd5f5', fontWeight: 500 }}
+            >
+              Announcement (visible to all guild members)
+            </label>
+            <textarea
+              id={`announcement-${guild.id}`}
+              name="announcement"
+              rows={5}
+              placeholder="Post announcements, welcome messages, or important information for guild members..."
+              defaultValue={guild.announcement ?? ''}
+              style={inputStyle}
+            />
+            <p style={{ margin: '0.5rem 0 0', color: '#94a3b8', fontSize: '0.85rem' }}>
+              This will be displayed prominently in the guild gallery for all members to see.
+            </p>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button type="submit" disabled={isUpdatePending} style={buttonStyle}>

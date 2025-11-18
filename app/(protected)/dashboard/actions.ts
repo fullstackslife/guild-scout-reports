@@ -30,6 +30,7 @@ export async function uploadScreenshot(_prev: UploadState, formData: FormData): 
   const file = formData.get('file') as File | null;
   const labelInput = (formData.get('label') as string | null) ?? '';
   const label = labelInput.trim().slice(0, 200) || null;
+  const guildIdInput = (formData.get('guild_id') as string | null)?.trim() || null;
 
   if (!file || file.size === 0) {
     return { error: 'Select an image file before uploading.' };
@@ -39,17 +40,33 @@ export async function uploadScreenshot(_prev: UploadState, formData: FormData): 
     return { error: 'Only image uploads are supported right now.' };
   }
 
-  // Get user's primary guild
-  const { data: guildMemberships } = await supabase
-    .from('guild_members')
-    .select('guild_id')
-    .eq('user_id', session.user.id)
-    .limit(1);
+  // Validate guild_id if provided
+  let guildId: string | null = null;
+  if (guildIdInput) {
+    // Verify user is a member of this guild
+    const { data: membership } = await supabase
+      .from('guild_members')
+      .select('guild_id')
+      .eq('user_id', session.user.id)
+      .eq('guild_id', guildIdInput)
+      .single();
 
-  const typedGuildMemberships = guildMemberships as GuildMemberRow[] | null;
-  const guildId = typedGuildMemberships && typedGuildMemberships.length > 0 
-    ? typedGuildMemberships[0].guild_id 
-    : null;
+    if (membership) {
+      guildId = guildIdInput;
+    }
+  } else {
+    // Fallback to first guild if no guild_id provided
+    const { data: guildMemberships } = await supabase
+      .from('guild_members')
+      .select('guild_id')
+      .eq('user_id', session.user.id)
+      .limit(1);
+
+    const typedGuildMemberships = guildMemberships as GuildMemberRow[] | null;
+    guildId = typedGuildMemberships && typedGuildMemberships.length > 0 
+      ? typedGuildMemberships[0].guild_id 
+      : null;
+  }
 
   const extension = file.name.split('.').pop()?.toLowerCase() ?? 'png';
   const filePath = `${session.user.id}/${randomUUID()}.${extension}`;

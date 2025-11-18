@@ -1,18 +1,21 @@
-import Image from 'next/image';
-import { formatDistanceToNow } from 'date-fns';
-import { UploadScreenshotForm } from '@/components/forms/upload-screenshot-form';
 import { SCREENSHOTS_BUCKET } from '@/lib/constants';
 import type { Database } from '@/lib/supabase/database.types';
 import { createSupabaseServerComponentClient } from '@/lib/supabase/server';
+import { DashboardClient } from '@/components/dashboard/dashboard-client';
 
 export const dynamic = 'force-dynamic';
 
 type ScreenshotRow = Database['public']['Tables']['screenshots']['Row'];
 type GuildRow = Database['public']['Tables']['guilds']['Row'];
-type GuildMemberRow = Pick<Database['public']['Tables']['guild_members']['Row'], 'guild_id'>;
-type ScreenshotWithUrl = ScreenshotRow & { signedUrl: string | null };
+type ScreenshotWithUrl = ScreenshotRow & {
+  signedUrl: string | null;
+};
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams
+}: {
+  searchParams: { guild?: string };
+}) {
   const supabase = createSupabaseServerComponentClient();
   const {
     data: { session }
@@ -22,26 +25,29 @@ export default async function DashboardPage() {
     return null;
   }
 
+  const selectedGuildId = searchParams.guild || null;
+
   // Get user's guilds
   const { data: guildMemberships } = await supabase
     .from('guild_members')
-    .select('guild_id')
+    .select('guild_id, guilds(*)')
     .eq('user_id', session.user.id);
 
-  const typedGuildMemberships = (guildMemberships as GuildMemberRow[] | null);
-  const userGuildIds = typedGuildMemberships?.map(gm => gm.guild_id) ?? [];
+  const userGuildIds = (guildMemberships ?? []).map((gm: any) => gm.guild_id);
 
-  // Fetch guild information
-  let currentGuild: GuildRow | null = null;
+  // Fetch all user guilds
+  let userGuilds: GuildRow[] = [];
   if (userGuildIds.length > 0) {
-    const { data: guildData } = await supabase
+    const { data: guildsData } = await supabase
       .from('guilds')
       .select('*')
-      .eq('id', userGuildIds[0])
-      .single();
-    currentGuild = (guildData as GuildRow | null);
+      .in('id', userGuildIds)
+      .order('name', { ascending: true });
+
+    userGuilds = (guildsData as GuildRow[]) ?? [];
   }
 
+  // Fetch all user screenshots
   const { data: screenshots } = await supabase
     .from('screenshots')
     .select('id, file_path, label, created_at, guild_id')
@@ -50,6 +56,7 @@ export default async function DashboardPage() {
 
   const screenshotList: ScreenshotRow[] = screenshots ?? [];
 
+  // Generate signed URLs
   const signedUrls: ScreenshotWithUrl[] = await Promise.all(
     screenshotList.map(async (shot) => {
       const { data } = await supabase.storage
@@ -64,103 +71,10 @@ export default async function DashboardPage() {
   );
 
   return (
-    <div style={{ display: 'grid', gap: '2rem' }}>
-      {currentGuild && (
-        <section style={{ 
-          padding: '1rem', 
-          borderRadius: '0.75rem', 
-          background: '#111827',
-          border: '1px solid rgba(148, 163, 184, 0.2)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ 
-              padding: '0.5rem 1rem', 
-              borderRadius: '0.5rem', 
-              background: '#38bdf8',
-              color: '#0f172a',
-              fontWeight: 600,
-              fontSize: '0.875rem'
-            }}>
-              {currentGuild.game}
-            </div>
-            <span style={{ color: '#94a3b8' }}>•</span>
-            <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{currentGuild.name}</span>
-          </div>
-        </section>
-      )}
-
-      <section style={{ display: 'grid', gap: '1rem' }}>
-        <h2 style={{ margin: 0 }}>Upload a new screenshot</h2>
-        <UploadScreenshotForm />
-      </section>
-
-      <section style={{ display: 'grid', gap: '1.5rem' }}>
-        <div>
-          <h2 style={{ margin: 0 }}>My uploads</h2>
-          <p style={{ margin: '0.25rem 0 0', color: '#94a3b8' }}>
-            Screenshots you have uploaded appear here. Only you and guild admins can delete them.
-          </p>
-        </div>
-        {signedUrls.length === 0 ? (
-          <div
-            style={{
-              padding: '2rem',
-              borderRadius: '1rem',
-              border: '1px dashed rgba(148, 163, 184, 0.4)',
-              background: '#0f172a'
-            }}
-          >
-            No screenshots yet. Upload your first scout report above.
-          </div>
-        ) : (
-          <div
-            style={{
-              display: 'grid',
-              gap: '1.5rem'
-            }}
-          >
-            {signedUrls.map((shot) => (
-              <article
-                key={shot.id}
-                style={{
-                  display: 'grid',
-                  gap: '1rem',
-                  borderRadius: '1rem',
-                  border: '1px solid rgba(148, 163, 184, 0.2)',
-                  background: '#111827',
-                  padding: '1.25rem'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
-                    Uploaded {formatDistanceToNow(new Date(shot.created_at), { addSuffix: true })}
-                  </div>
-                </div>
-                {shot.signedUrl ? (
-                  <Image
-                    src={shot.signedUrl}
-                    alt={shot.label ?? 'Screenshot upload'}
-                    width={1200}
-                    height={720}
-                    sizes="(max-width: 768px) 100vw, 900px"
-                    style={{
-                      width: '100%',
-                      height: 'auto',
-                      maxHeight: '420px',
-                      objectFit: 'contain',
-                      borderRadius: '0.75rem',
-                      background: '#0f172a'
-                    }}
-                  />
-                ) : (
-                  <div style={{ color: '#fca5a5' }}>Unable to generate preview.</div>
-                )}
-                {shot.label ? <p style={{ margin: 0 }}>{shot.label}</p> : null}
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-    </div>
+    <DashboardClient
+      userGuilds={userGuilds}
+      screenshots={signedUrls}
+      selectedGuildId={selectedGuildId}
+    />
   );
 }

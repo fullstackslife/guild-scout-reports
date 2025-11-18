@@ -133,6 +133,7 @@ export async function updateGuild(
   const name = (formData.get('name') as string | null)?.trim() ?? '';
   const gameId = (formData.get('game_id') as string | null)?.trim() ?? '';
   const description = (formData.get('description') as string | null)?.trim() || null;
+  const announcement = (formData.get('announcement') as string | null)?.trim() || null;
 
   if (!guildId || !name || !gameId) {
     return { error: 'Guild ID, name, and game are required.' };
@@ -155,7 +156,8 @@ export async function updateGuild(
     name,
     game: game.name,
     game_id: gameId,
-    description
+    description,
+    announcement
   };
 
   const { error: updateError } = await admin
