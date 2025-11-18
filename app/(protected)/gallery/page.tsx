@@ -54,11 +54,21 @@ export default async function GalleryPage() {
   }
 
   // Fetch screenshots from user's guild(s)
-  const { data: screenshots, error: screenshotError } = await supabase
-    .from('screenshots')
-    .select('id, file_path, label, extracted_text, processing_status, created_at, user_id, guild_id')
-    .in('guild_id', userGuildIds.length > 0 ? userGuildIds : [''])
-    .order('created_at', { ascending: false });
+  let screenshots: ScreenshotRow[] | null = null;
+  let screenshotError = null;
+  
+  if (userGuildIds.length > 0) {
+    const result = await supabase
+      .from('screenshots')
+      .select('id, file_path, label, extracted_text, processing_status, created_at, user_id, guild_id')
+      .in('guild_id', userGuildIds)
+      .order('created_at', { ascending: false });
+    screenshots = result.data;
+    screenshotError = result.error;
+  } else {
+    // No guilds - return empty array
+    screenshots = [];
+  }
 
   if (screenshotError) {
     console.error('Gallery query error:', screenshotError);

@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerActionClient } from "@/lib/supabase/server";
+import type { Database } from "@/lib/supabase/database.types";
 
 interface ExtractTextRequest {
   screenshotId: string;
@@ -94,12 +95,13 @@ If the image contains no readable text, respond with "No text found in image".`
     // Update database with extracted text
     const supabase = createSupabaseServerActionClient();
 
+    const updateData: Database['public']['Tables']['screenshots']['Update'] = {
+      extracted_text: extractedText,
+      processing_status: "completed" as const
+    };
     const { error: updateError } = await supabase
       .from("screenshots")
-      .update({
-        extracted_text: extractedText,
-        processing_status: "completed" as const
-      } as never)
+      .update(updateData as never)
       .eq("id", request.screenshotId);
 
     if (updateError) {
@@ -121,11 +123,12 @@ If the image contains no readable text, respond with "No text found in image".`
     // Mark as failed in database
     const supabase = createSupabaseServerActionClient();
     try {
+      const failedUpdate: Database['public']['Tables']['screenshots']['Update'] = {
+        processing_status: "failed" as const
+      };
       await supabase
         .from("screenshots")
-        .update({
-          processing_status: "failed" as const
-        } as never)
+        .update(failedUpdate as never)
         .eq("id", request.screenshotId);
     } catch (dbError) {
       console.error("Failed to update processing status:", dbError);
