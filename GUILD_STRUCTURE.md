@@ -15,7 +15,9 @@ create table public.guilds (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   game text not null,
+  game_id uuid references public.games (id) on delete set null,
   description text,
+  promo_code text unique,
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
 );
@@ -25,7 +27,9 @@ create table public.guilds (
 - `id`: Unique identifier for the guild
 - `name`: Guild name (e.g., "Phoenix Raiders", "Storm Chasers")
 - `game`: Game the guild plays (e.g., "World of Warcraft", "Final Fantasy XIV")
+- `game_id`: Foreign key reference to the games table
 - `description`: Optional guild description
+- `promo_code`: **Unique promo code for user signup** (e.g., "WOW_PHOEN_A3B9")
 - `created_at`: Guild creation timestamp
 - `updated_at`: Last update timestamp
 
@@ -150,9 +154,11 @@ with check (
 
 Users can only upload screenshots to guilds they are members of.
 
-## Default Guild
+## Default Guild (Legacy)
 
-For backward compatibility and to ensure all users have at least one guild, a default guild is automatically created:
+**Note**: As of the promo code implementation, the default guild is no longer automatically assigned to new users. Users must provide a valid promo code during signup.
+
+For backward compatibility with existing data, a default guild may exist:
 
 ```sql
 insert into public.guilds (name, game, description)
@@ -160,39 +166,97 @@ values ('Default Guild', 'General', 'Default guild for all users')
 on conflict do nothing;
 ```
 
-During migration:
-1. All existing users are added to the default guild
-2. All existing screenshots are assigned to the default guild
-3. New users are automatically added to the default guild during signup
+The default guild (if it exists):
+1. Contains existing users from before the promo code system
+2. Has existing screenshots assigned to it
+3. Can still be used by providing its promo code during signup
+
+## Guild Promo Codes
+
+Each guild has a unique promo code that controls user signup and guild assignment.
+
+### Promo Code Format
+
+Promo codes follow the format: `GAME_GUILDNAME_RANDOM`
+
+Examples:
+- `WOW_PHOEN_A3B9` (World of Warcraft - Phoenix Raiders)
+- `LOR_STORM_X7F2` (Lords Mobile - Storm Chasers)
+- `KIN_ELITE_M9K4` (Kingshot - Elite Squad)
+
+### Promo Code Generation
+
+Promo codes are automatically generated when a guild is created:
+
+```typescript
+import { generatePromoCode } from '@/lib/promo-code-utils';
+
+// During guild creation
+const promoCode = generatePromoCode(game.name, guildName);
+// Result: "WOW_PHOEN_A3B9"
+```
+
+The system:
+1. Takes first 3 characters of game name (alphanumeric only)
+2. Takes first 6 characters of guild name (alphanumeric only)
+3. Adds a 4-character random suffix
+4. Checks for uniqueness and retries if collision detected (up to 10 attempts)
+
+### Admin Workflow
+
+When an admin creates a guild (`/admin/guilds`):
+
+1. Admin fills in guild name, game, and description
+2. System generates unique promo code automatically
+3. Promo code is displayed in the success message
+4. Promo code is visible in the guild list for sharing with users
+
+```typescript
+// In guild creation action
+const guildInsert = {
+  name,
+  game: game.name,
+  game_id: gameId,
+  description,
+  promo_code: promoCode
+};
+```
 
 ## Application Logic
 
-### User Signup
+### User Signup with Promo Code
 
 When a new user signs up (`app/(public)/signup/actions.ts`):
 
-1. User account is created in Supabase Auth
-2. Profile record is created
-3. User is automatically added to the default guild
+1. User provides email, name, password, and **promo code**
+2. System validates promo code exists in database
+3. User account is created in Supabase Auth
+4. Profile record is created
+5. User is automatically added to the guild matching the promo code
 
 ```typescript
-// Get the default guild
-const { data: defaultGuild } = await adminClient
+// Validate promo code and get guild
+const { data: guild, error: guildError } = await adminClient
   .from('guilds')
-  .select('id')
-  .eq('name', 'Default Guild')
+  .select('id, name')
+  .eq('promo_code', promoCode)
   .single();
 
-if (defaultGuild) {
-  await adminClient
-    .from('guild_members')
-    .insert({
-      guild_id: defaultGuild.id,
-      user_id: userId,
-      role: 'member'
-    });
+if (guildError || !guild) {
+  return { error: 'Invalid promo code. Please check with your guild admin.' };
 }
+
+// Add user to the guild based on promo code
+await adminClient
+  .from('guild_members')
+  .insert({
+    guild_id: guild.id,
+    user_id: userId,
+    role: 'member'
+  });
 ```
+
+**Important**: Promo code is now **required** for signup. Users cannot sign up without a valid promo code from an existing guild.
 
 ### Screenshot Upload
 
