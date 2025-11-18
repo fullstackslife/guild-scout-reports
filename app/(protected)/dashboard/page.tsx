@@ -50,7 +50,7 @@ export default async function DashboardPage({
   // Fetch all user screenshots
   const { data: screenshots } = await supabase
     .from('screenshots')
-    .select('id, file_path, label, created_at, guild_id')
+    .select('id, file_path, label, extracted_text, processing_status, created_at, guild_id')
     .eq('user_id', session.user.id)
     .order('created_at', { ascending: false });
 

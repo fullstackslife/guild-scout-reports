@@ -227,6 +227,44 @@ export function DashboardClient({ userGuilds, screenshots, selectedGuildId }: Da
                   <div style={{ color: '#fca5a5' }}>Unable to generate preview.</div>
                 )}
                 {shot.label ? <p style={{ margin: 0 }}>{shot.label}</p> : null}
+                
+                {/* Action buttons */}
+                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => router.push(`/scout-reports/${shot.id}`)}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      borderRadius: '0.5rem',
+                      background: '#3b82f6',
+                      color: '#fff',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                      fontSize: '0.875rem',
+                      transition: 'background 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#2563eb';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#3b82f6';
+                    }}
+                  >
+                    📊 Enter Scout Data
+                  </button>
+                  {shot.processing_status === 'completed' && shot.extracted_text && (
+                    <span style={{
+                      padding: '0.5rem 1rem',
+                      borderRadius: '0.5rem',
+                      background: 'rgba(52, 211, 153, 0.1)',
+                      color: '#34d399',
+                      fontSize: '0.875rem',
+                      fontWeight: 600
+                    }}>
+                      ✓ OCR Complete
+                    </span>
+                  )}
+                </div>
               </article>
             ))}
           </div>

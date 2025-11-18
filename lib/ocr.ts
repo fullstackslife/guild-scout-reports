@@ -112,6 +112,40 @@ If the image contains no readable text, respond with "No text found in image".`
       };
     }
 
+    // Trigger structured data parsing in the background (don't block)
+    // Note: We don't store parsed data here - it will be parsed when user creates scout report
+    // This is just a placeholder for future enhancement
+    try {
+      const { parseScoutReportFromText } = await import("./scout-report-parser");
+      const { data: screenshot } = await supabase
+        .from("screenshots")
+        .select("guild_id, guilds(game)")
+        .eq("id", request.screenshotId)
+        .single();
+
+      if (screenshot) {
+        type ScreenshotWithGuild = {
+          guild_id: string | null;
+          guilds?: { game: string } | null;
+        };
+        const typedScreenshot = screenshot as ScreenshotWithGuild | null;
+        const gameName = typedScreenshot?.guilds?.game;
+        
+        // Parse in background but don't store - user will trigger full parse when creating report
+        parseScoutReportFromText({
+          screenshotId: request.screenshotId,
+          extractedText,
+          gameName: gameName || undefined
+        }).catch(err => {
+          console.error("Failed to parse structured data:", err);
+          // Don't fail OCR if parsing fails
+        });
+      }
+    } catch (parseError) {
+      console.error("Failed to trigger parsing:", parseError);
+      // Continue - parsing is optional
+    }
+
     return {
       success: true,
       extractedText,
