@@ -60,15 +60,26 @@ export function AppShell({ profile, children }: AppShellProps) {
             </Link>
           ))}
           {profile.role === 'admin' ? (
-            <Link
-              href="/admin/users"
-              style={{
-                color: pathname?.startsWith('/admin') ? '#38bdf8' : '#cbd5f5',
-                fontWeight: pathname?.startsWith('/admin') ? 600 : 400
-              }}
-            >
-              Admin
-            </Link>
+            <>
+              <Link
+                href="/admin/users"
+                style={{
+                  color: pathname?.startsWith('/admin/users') ? '#38bdf8' : '#cbd5f5',
+                  fontWeight: pathname?.startsWith('/admin/users') ? 600 : 400
+                }}
+              >
+                Users
+              </Link>
+              <Link
+                href="/admin/guilds"
+                style={{
+                  color: pathname?.startsWith('/admin/guilds') ? '#38bdf8' : '#cbd5f5',
+                  fontWeight: pathname?.startsWith('/admin/guilds') ? 600 : 400
+                }}
+              >
+                Guilds
+              </Link>
+            </>
           ) : null}
           <button
             onClick={handleSignOut}
