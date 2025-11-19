@@ -46,6 +46,11 @@ export function MapClient({ reports, kingdoms, selectedKingdom }: MapClientProps
   const [deviceId, setDeviceId] = useState<string>('127.0.0.1:5555');
   const [showCapturePanel, setShowCapturePanel] = useState(false);
   const [lastCapture, setLastCapture] = useState<{ url: string; timestamp: string } | null>(null);
+  
+  // ADB Navigation state
+  const [navigating, setNavigating] = useState(false);
+  const [showNavigationPanel, setShowNavigationPanel] = useState(false);
+  const [lastNavigation, setLastNavigation] = useState<{ success: boolean; message: string } | null>(null);
 
   // Filter reports based on search criteria
   const filteredReports = useMemo(() => {
@@ -462,6 +467,92 @@ export function MapClient({ reports, kingdoms, selectedKingdom }: MapClientProps
       params.delete('kingdom');
     }
     router.push(`/map?${params.toString()}`);
+  };
+
+  // Handle ADB navigation
+  const handleNavigate = async (commandType: 'search' | 'scout' | 'custom', customCommands?: any[]) => {
+    if (!selectedCell || !selectedKingdom) {
+      alert('Please select a coordinate and kingdom first');
+      return;
+    }
+
+    setNavigating(true);
+    try {
+      let sequence: any[] = [];
+      
+      if (commandType === 'search') {
+        // Navigate to coordinate on map
+        sequence = [
+          { type: 'tap', x: 100, y: 100, description: 'Open map' },
+          { type: 'wait', duration: 1000 },
+          { type: 'tap', x: 1700, y: 100, description: 'Open search' },
+          { type: 'wait', duration: 500 },
+          { type: 'tap', x: 960, y: 300, description: 'Click X coordinate' },
+          { type: 'text', text: selectedCell.x.toString() },
+          { type: 'wait', duration: 300 },
+          { type: 'tap', x: 960, y: 400, description: 'Click Y coordinate' },
+          { type: 'text', text: selectedCell.y.toString() },
+          { type: 'wait', duration: 300 },
+          { type: 'tap', x: 960, y: 600, description: 'Confirm search' },
+          { type: 'wait', duration: 1500 }
+        ];
+      } else if (commandType === 'scout') {
+        // Navigate to coordinate and scout
+        sequence = [
+          { type: 'tap', x: 100, y: 100, description: 'Open map' },
+          { type: 'wait', duration: 1000 },
+          { type: 'tap', x: 1700, y: 100, description: 'Open search' },
+          { type: 'wait', duration: 500 },
+          { type: 'tap', x: 960, y: 300, description: 'Click X coordinate' },
+          { type: 'text', text: selectedCell.x.toString() },
+          { type: 'wait', duration: 300 },
+          { type: 'tap', x: 960, y: 400, description: 'Click Y coordinate' },
+          { type: 'text', text: selectedCell.y.toString() },
+          { type: 'wait', duration: 300 },
+          { type: 'tap', x: 960, y: 600, description: 'Confirm search' },
+          { type: 'wait', duration: 1500 },
+          { type: 'tap', x: 1600, y: 800, description: 'Tap scout button' },
+          { type: 'wait', duration: 2000 },
+          { type: 'tap', x: 1600, y: 800, description: 'View scout report' },
+          { type: 'wait', duration: 2000 }
+        ];
+      } else if (commandType === 'custom' && customCommands) {
+        sequence = customCommands;
+      }
+
+      const response = await fetch('/api/adb/navigate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          device_id: deviceId,
+          sequence
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setLastNavigation({
+          success: true,
+          message: `Navigation completed: ${data.executed} commands executed`
+        });
+      } else {
+        setLastNavigation({
+          success: false,
+          message: `Navigation failed: ${data.error || 'Unknown error'}`
+        });
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
+      setLastNavigation({
+        success: false,
+        message: 'Failed to execute navigation commands'
+      });
+    } finally {
+      setNavigating(false);
+    }
   };
 
   // Handle screenshot capture
@@ -940,6 +1031,140 @@ export function MapClient({ reports, kingdoms, selectedKingdom }: MapClientProps
           </div>
         </div>
       </div>
+
+      {/* ADB Navigation Panel */}
+      {selectedCell && selectedKingdom && (
+        <div
+          style={{
+            padding: '1.5rem',
+            borderRadius: '0.75rem',
+            border: '1px solid rgba(34, 197, 94, 0.3)',
+            background: 'rgba(34, 197, 94, 0.1)'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#22c55e' }}>
+              ADB Navigation - {selectedKingdom}:{selectedCell.x}:{selectedCell.y}
+            </h3>
+            <button
+              onClick={() => setShowNavigationPanel(!showNavigationPanel)}
+              style={{
+                padding: '0.5rem 1rem',
+                borderRadius: '0.5rem',
+                border: '1px solid rgba(34, 197, 94, 0.3)',
+                background: showNavigationPanel ? '#15803d' : '#0f172a',
+                color: '#e2e8f0',
+                cursor: 'pointer'
+              }}
+            >
+              {showNavigationPanel ? 'Hide' : 'Show'} Navigation Panel
+            </button>
+          </div>
+
+          {showNavigationPanel && (
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <button
+                  onClick={() => handleNavigate('search')}
+                  disabled={navigating}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    borderRadius: '0.5rem',
+                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                    background: navigating ? '#475569' : '#15803d',
+                    color: '#e2e8f0',
+                    cursor: navigating ? 'not-allowed' : 'pointer',
+                    fontWeight: 600
+                  }}
+                >
+                  {navigating ? 'Navigating...' : '📍 Search Coordinate'}
+                </button>
+                <button
+                  onClick={() => handleNavigate('scout')}
+                  disabled={navigating}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    borderRadius: '0.5rem',
+                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                    background: navigating ? '#475569' : '#15803d',
+                    color: '#e2e8f0',
+                    cursor: navigating ? 'not-allowed' : 'pointer',
+                    fontWeight: 600
+                  }}
+                >
+                  {navigating ? 'Navigating...' : '🔍 Navigate & Scout'}
+                </button>
+              </div>
+              
+              <div style={{ padding: '0.75rem', borderRadius: '0.5rem', background: '#0f172a', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+                <div style={{ color: '#94a3b8', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                  Quick Actions:
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.5rem' }}>
+                  <button
+                    onClick={() => handleNavigate('custom', [{ type: 'tap', x: 100, y: 100 }, { type: 'wait', duration: 500 }])}
+                    disabled={navigating}
+                    style={{
+                      padding: '0.5rem',
+                      borderRadius: '0.5rem',
+                      border: '1px solid rgba(34, 197, 94, 0.2)',
+                      background: '#1e293b',
+                      color: '#e2e8f0',
+                      cursor: navigating ? 'not-allowed' : 'pointer',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    Open Map
+                  </button>
+                  <button
+                    onClick={() => handleNavigate('custom', [{ type: 'tap', x: 100, y: 200 }, { type: 'wait', duration: 500 }])}
+                    disabled={navigating}
+                    style={{
+                      padding: '0.5rem',
+                      borderRadius: '0.5rem',
+                      border: '1px solid rgba(34, 197, 94, 0.2)',
+                      background: '#1e293b',
+                      color: '#e2e8f0',
+                      cursor: navigating ? 'not-allowed' : 'pointer',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    Return to Castle
+                  </button>
+                  <button
+                    onClick={() => handleNavigate('custom', [{ type: 'key', keycode: 4 }, { type: 'wait', duration: 300 }])}
+                    disabled={navigating}
+                    style={{
+                      padding: '0.5rem',
+                      borderRadius: '0.5rem',
+                      border: '1px solid rgba(34, 197, 94, 0.2)',
+                      background: '#1e293b',
+                      color: '#e2e8f0',
+                      cursor: navigating ? 'not-allowed' : 'pointer',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    Back Button
+                  </button>
+                </div>
+              </div>
+              
+              {lastNavigation && (
+                <div style={{ 
+                  padding: '0.75rem', 
+                  borderRadius: '0.5rem', 
+                  background: lastNavigation.success ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                  border: `1px solid ${lastNavigation.success ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
+                }}>
+                  <div style={{ color: lastNavigation.success ? '#22c55e' : '#ef4444', fontSize: '0.875rem' }}>
+                    {lastNavigation.message}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Screenshot Capture Panel */}
       {selectedCell && selectedKingdom && (
