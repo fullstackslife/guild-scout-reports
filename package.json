@@ -9,7 +9,8 @@
     "lint": "next lint",
     "migrate:check": "node scripts/check-migrations.js",
     "migrate:list": "node scripts/apply-migrations.js",
-    "test:oracle": "tsx scripts/test-oracle-connection.ts"
+    "test:oracle": "tsx scripts/test-oracle-connection.ts",
+    "import:gear": "tsx scripts/import-gear-from-csv.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.3",

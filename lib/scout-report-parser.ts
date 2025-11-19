@@ -12,6 +12,9 @@ export interface ParsedScoutReport {
   target_name?: string | null;
   target_guild?: string | null;
   coordinates?: string | null;
+  coordinate_k?: string | null;
+  coordinate_x?: string | null;
+  coordinate_y?: string | null;
   might?: number | null;
   leader_present?: boolean | null;
   anti_scout_active?: boolean | null;
@@ -176,7 +179,10 @@ Required JSON structure:
 {
   "target_name": "string or null",
   "target_guild": "string or null",
-  "coordinates": "string or null (format: X:Y or similar)",
+  "coordinates": "string or null (format: K:X:Y or X:Y - legacy format)",
+  "coordinate_k": "string or null (Kingdom number)",
+  "coordinate_x": "string or null (X coordinate)",
+  "coordinate_y": "string or null (Y coordinate)",
   "might": "number or null",
   "leader_present": "boolean or null",
   "anti_scout_active": "boolean or null",
@@ -188,7 +194,7 @@ Required JSON structure:
   "wall_familiars": "string or null",
   "active_boosts": "string or null (JSON array of active boosts)",
   "total_troops": "number or null",
-  "troop_breakdown": "string or null (JSON: {infantry: {t2: number, t3: number, ...}, cavalry: {...}, range: {...}})",
+  "troop_breakdown": "string or null (JSON: {infantry: {t1: number, t2: number, t3: number, t4: number, t5: number}, range: {t1-t5}, cavalry: {t1-t5}, siege: {t1-t5}})",
   "reinforcements_count": "number or null",
   "reinforcements_details": "string or null (JSON array of {sender_name, sender_guild, troop_count})",
   "garrisons_count": "number or null",
@@ -210,8 +216,12 @@ Required JSON structure:
 
 Important parsing rules:
 1. Extract numbers carefully - look for patterns like "1,234,567" or "1.2M" (convert to actual numbers)
-2. For troop breakdown, identify tier levels (T1, T2, T3, T4, T5) and troop types (Infantry, Cavalry, Range)
-3. For coordinates, look for patterns like "X:Y", "(X, Y)", or similar
+2. For troop breakdown, identify tier levels (T1, T2, T3, T4, T5) and troop types (Infantry, Range, Cavalry, Siege). Structure as: {infantry: {t1: number, t2: number, t3: number, t4: number, t5: number}, range: {...}, cavalry: {...}, siege: {...}}
+3. For coordinates, extract separately:
+   - coordinate_k: Kingdom number (K)
+   - coordinate_x: X coordinate
+   - coordinate_y: Y coordinate
+   Look for patterns like "K:X:Y", "X:Y", "(X, Y)", or similar. If only X:Y format found, set coordinate_k to null.
 4. For boolean fields, look for indicators like "Yes/No", "Active/Inactive", checkmarks, etc.
 5. If a field is not visible or unclear, use null
 6. Preserve the exact structure - return valid JSON only, no markdown or extra text

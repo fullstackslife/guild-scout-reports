@@ -70,7 +70,17 @@ export async function createScoutReport(
       // Target basics
       target_name: (formData.get("target_name") as string | null)?.trim() || null,
       target_guild: (formData.get("target_guild") as string | null)?.trim() || null,
-      coordinates: (formData.get("coordinates") as string | null)?.trim() || null,
+      coordinates: (() => {
+        const k = (formData.get("coordinate_k") as string | null)?.trim() || null;
+        const x = (formData.get("coordinate_x") as string | null)?.trim() || null;
+        const y = (formData.get("coordinate_y") as string | null)?.trim() || null;
+        if (k && x && y) return `${k}:${x}:${y}`;
+        if (x && y) return `${x}:${y}`;
+        return null;
+      })(),
+      coordinate_k: (formData.get("coordinate_k") as string | null)?.trim() || null,
+      coordinate_x: (formData.get("coordinate_x") as string | null)?.trim() || null,
+      coordinate_y: (formData.get("coordinate_y") as string | null)?.trim() || null,
       might: parseNumber(formData.get("might")),
       leader_present: parseBoolean(formData.get("leader_present")),
       anti_scout_active: parseBoolean(formData.get("anti_scout_active")),
@@ -86,7 +96,7 @@ export async function createScoutReport(
       
       // Army picture
       total_troops: parseNumber(formData.get("total_troops")),
-      troop_breakdown: (formData.get("troop_breakdown") as string | null)?.trim() || null,
+      troop_breakdown: (formData.get("troop_breakdown") as string | null)?.trim() || null, // JSON with structured breakdown
       reinforcements_count: parseNumber(formData.get("reinforcements_count")),
       reinforcements_details: (formData.get("reinforcements_details") as string | null)?.trim() || null,
       garrisons_count: parseNumber(formData.get("garrisons_count")),

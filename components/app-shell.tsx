@@ -15,6 +15,7 @@ const navItems = [
   { href: '/dashboard', label: 'My Screenshots' },
   { href: '/gallery', label: 'Guild Gallery' },
   { href: '/games', label: 'Games' },
+  { href: '/gear-optimizer', label: 'Gear Optimizer' },
   { href: '/profile', label: 'Profile' }
 ];
 

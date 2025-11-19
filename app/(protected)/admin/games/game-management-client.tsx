@@ -187,7 +187,7 @@ function GameItem({ game }: { game: Game }) {
                 id={`coming_soon-${game.id}`}
                 name="coming_soon"
                 type="checkbox"
-                defaultChecked={game.coming_soon}
+                defaultChecked={game.coming_soon ?? false}
                 style={{ width: '1.1rem', height: '1.1rem' }}
               />
               <label htmlFor={`coming_soon-${game.id}`} style={{ color: '#cbd5f5', fontSize: '0.9rem' }}>
