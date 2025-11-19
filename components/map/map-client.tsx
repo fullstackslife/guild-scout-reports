@@ -39,6 +39,13 @@ export function MapClient({ reports, kingdoms, selectedKingdom }: MapClientProps
   const [searchNearY, setSearchNearY] = useState<string>('');
   const [searchRadius, setSearchRadius] = useState<string>('50');
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Screenshot capture state
+  const [capturing, setCapturing] = useState(false);
+  const [captureGameState, setCaptureGameState] = useState<string>('scout');
+  const [deviceId, setDeviceId] = useState<string>('127.0.0.1:5555');
+  const [showCapturePanel, setShowCapturePanel] = useState(false);
+  const [lastCapture, setLastCapture] = useState<{ url: string; timestamp: string } | null>(null);
 
   // Filter reports based on search criteria
   const filteredReports = useMemo(() => {
@@ -455,6 +462,50 @@ export function MapClient({ reports, kingdoms, selectedKingdom }: MapClientProps
       params.delete('kingdom');
     }
     router.push(`/map?${params.toString()}`);
+  };
+
+  // Handle screenshot capture
+  const handleCaptureScreenshot = async () => {
+    if (!selectedCell || !selectedKingdom) {
+      alert('Please select a coordinate and kingdom first');
+      return;
+    }
+
+    setCapturing(true);
+    try {
+      const response = await fetch('/api/screenshots/capture', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          coordinate_k: selectedKingdom,
+          coordinate_x: selectedCell.x.toString(),
+          coordinate_y: selectedCell.y.toString(),
+          game_state: captureGameState,
+          device_id: deviceId,
+          label: `Map capture at ${selectedKingdom}:${selectedCell.x}:${selectedCell.y}`
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setLastCapture({
+          url: data.screenshot.url,
+          timestamp: new Date().toISOString()
+        });
+        // Refresh the page to show new screenshot
+        router.refresh();
+      } else {
+        alert(`Capture failed: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Capture error:', error);
+      alert('Failed to capture screenshot');
+    } finally {
+      setCapturing(false);
+    }
   };
 
   const selectedCellData = selectedCell
@@ -889,6 +940,132 @@ export function MapClient({ reports, kingdoms, selectedKingdom }: MapClientProps
           </div>
         </div>
       </div>
+
+      {/* Screenshot Capture Panel */}
+      {selectedCell && selectedKingdom && (
+        <div
+          style={{
+            padding: '1.5rem',
+            borderRadius: '0.75rem',
+            border: '1px solid rgba(56, 189, 248, 0.3)',
+            background: 'rgba(56, 189, 248, 0.1)'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#38bdf8' }}>
+              Screenshot Capture - {selectedKingdom}:{selectedCell.x}:{selectedCell.y}
+            </h3>
+            <button
+              onClick={() => setShowCapturePanel(!showCapturePanel)}
+              style={{
+                padding: '0.5rem 1rem',
+                borderRadius: '0.5rem',
+                border: '1px solid rgba(56, 189, 248, 0.3)',
+                background: showCapturePanel ? '#1e40af' : '#0f172a',
+                color: '#e2e8f0',
+                cursor: 'pointer'
+              }}
+            >
+              {showCapturePanel ? 'Hide' : 'Show'} Capture Panel
+            </button>
+          </div>
+
+          {showCapturePanel && (
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <div>
+                  <label style={{ color: '#94a3b8', fontSize: '0.875rem', display: 'block', marginBottom: '0.25rem' }}>
+                    Game State
+                  </label>
+                  <select
+                    value={captureGameState}
+                    onChange={(e) => setCaptureGameState(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      borderRadius: '0.5rem',
+                      border: '1px solid rgba(148, 163, 184, 0.3)',
+                      background: '#1e293b',
+                      color: '#e2e8f0',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="scout">Scout Report</option>
+                    <option value="battle">Battle</option>
+                    <option value="menu">Menu</option>
+                    <option value="map">Map View</option>
+                    <option value="loading">Loading</option>
+                    <option value="unknown">Unknown</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ color: '#94a3b8', fontSize: '0.875rem', display: 'block', marginBottom: '0.25rem' }}>
+                    Device ID (ADB)
+                  </label>
+                  <input
+                    type="text"
+                    value={deviceId}
+                    onChange={(e) => setDeviceId(e.target.value)}
+                    placeholder="127.0.0.1:5555"
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      borderRadius: '0.5rem',
+                      border: '1px solid rgba(148, 163, 184, 0.3)',
+                      background: '#1e293b',
+                      color: '#e2e8f0'
+                    }}
+                  />
+                </div>
+              </div>
+              <button
+                onClick={handleCaptureScreenshot}
+                disabled={capturing}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '0.5rem',
+                  border: '1px solid rgba(56, 189, 248, 0.3)',
+                  background: capturing ? '#475569' : '#1e40af',
+                  color: '#e2e8f0',
+                  cursor: capturing ? 'not-allowed' : 'pointer',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                {capturing ? (
+                  <>
+                    <span>Capturing...</span>
+                    <span style={{ fontSize: '0.875rem' }}>⏳</span>
+                  </>
+                ) : (
+                  <>
+                    <span>📸 Capture Screenshot via ADB</span>
+                  </>
+                )}
+              </button>
+              {lastCapture && (
+                <div style={{ padding: '0.75rem', borderRadius: '0.5rem', background: '#0f172a', border: '1px solid rgba(56, 189, 248, 0.2)' }}>
+                  <div style={{ color: '#38bdf8', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Last Capture:</div>
+                  <a
+                    href={lastCapture.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#60a5fa', textDecoration: 'underline' }}
+                  >
+                    View Screenshot
+                  </a>
+                  <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+                    {new Date(lastCapture.timestamp).toLocaleString()}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Selected Cell Details */}
       {selectedCellData && (
