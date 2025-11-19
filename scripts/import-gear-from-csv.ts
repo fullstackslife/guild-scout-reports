@@ -10,7 +10,6 @@ import { resolve } from "path";
 // Load environment variables
 dotenv.config({ path: resolve(process.cwd(), ".env.local") });
 import { readFileSync } from "fs";
-import { resolve } from "path";
 
 interface GearRow {
   itemName: string;
@@ -111,7 +110,7 @@ function extractTier(reqLevel: string): number | null {
 }
 
 async function importGearFromCSV() {
-  const csvPath = resolve(process.cwd(), "Copy of LM Gear (v. 2021-02; WIP) - Sheet1.csv");
+  const csvPath = resolve(__dirname, "..", "Copy of LM Gear (v. 2021-02; WIP) - Sheet1.csv");
   
   console.log("Reading CSV file...");
   const csvContent = readFileSync(csvPath, "utf-8");
